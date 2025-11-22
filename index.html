@@ -1,413 +1,154 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Nintendo DS — Play (Powered by desmond)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nintendo DS Emulator – Desmond Enhanced UI</title>
 
+<!-- ====== EMBEDDED CSS ====== -->
+<style>
     body {
-      font-family: 'Patrick Hand', cursive;
-      min-height: 100vh;
-      background: 
-        repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(200,220,240,0.3) 31px, rgba(200,220,240,0.3) 32px),
-        linear-gradient(135deg, #fef9f3 0%, #fdf6ed 50%, #fef5e7 100%);
-      background-attachment: fixed;
-      position: relative;
-      overflow-x: hidden;
+        margin: 0;
+        background: #0d0d0d;
+        font-family: Arial, sans-serif;
+        color: white;
+        overflow-x: hidden;
     }
 
-    /* Paper texture overlay */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
-      opacity: 0.03;
-      pointer-events: none;
-      z-index: 0;
+    header {
+        width: 100%;
+        padding: 12px 20px;
+        background: #1c1c1c;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #333;
     }
 
-    /* Stickers */
-    .sticker {
-      position: fixed;
-      font-size: 2.5rem;
-      filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.15));
-      z-index: 5;
-      transform-origin: center;
-      animation: stickerWobble 4s ease-in-out infinite;
-    }
-    .sticker:nth-child(1) { top: 8%; left: 4%; transform: rotate(-12deg); animation-delay: 0s; }
-    .sticker:nth-child(2) { top: 15%; right: 6%; transform: rotate(8deg); animation-delay: 0.5s; }
-    .sticker:nth-child(3) { top: 45%; left: 2%; transform: rotate(15deg); animation-delay: 1s; }
-    .sticker:nth-child(4) { bottom: 20%; right: 3%; transform: rotate(-8deg); animation-delay: 1.5s; }
-    .sticker:nth-child(5) { bottom: 8%; left: 6%; transform: rotate(5deg); animation-delay: 2s; }
-    .sticker:nth-child(6) { top: 70%; right: 8%; transform: rotate(-15deg); animation-delay: 2.5s; }
-    .sticker:nth-child(7) { top: 35%; right: 2%; transform: rotate(20deg); animation-delay: 3s; }
-    .sticker:nth-child(8) { bottom: 35%; left: 3%; transform: rotate(-5deg); animation-delay: 3.5s; }
-
-    @keyframes stickerWobble {
-      0%, 100% { transform: rotate(var(--rot, 0deg)) scale(1); }
-      50% { transform: rotate(var(--rot, 0deg)) scale(1.05); }
+    header h1 {
+        font-size: 20px;
+        margin: 0;
     }
 
-    /* Washi tape decorations */
-    .tape {
-      position: fixed;
-      width: 120px;
-      height: 28px;
-      opacity: 0.7;
-      z-index: 4;
-      border-radius: 2px;
-    }
-    .tape-1 {
-      background: repeating-linear-gradient(45deg, #ffb6c1, #ffb6c1 5px, #ffc0cb 5px, #ffc0cb 10px);
-      top: 12%; left: 15%; transform: rotate(-25deg);
-    }
-    .tape-2 {
-      background: repeating-linear-gradient(45deg, #98d8c8, #98d8c8 5px, #b8e8d8 5px, #b8e8d8 10px);
-      top: 25%; right: 12%; transform: rotate(15deg);
-    }
-    .tape-3 {
-      background: repeating-linear-gradient(45deg, #fff3b0, #fff3b0 5px, #fff8d0 5px, #fff8d0 10px);
-      bottom: 18%; left: 20%; transform: rotate(10deg);
-    }
-    .tape-4 {
-      background: repeating-linear-gradient(45deg, #c3b1e1, #c3b1e1 5px, #d8c9f0 5px, #d8c9f0 10px);
-      bottom: 30%; right: 18%; transform: rotate(-12deg);
+    #romSelectContainer {
+        display: flex;
+        gap: 10px;
+        align-items: center;
     }
 
-    .site-header {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      padding: 35px 20px 20px;
+    select, button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: none;
+        font-size: 15px;
+        background: #292929;
+        color: white;
+        cursor: pointer;
     }
 
-    .brand {
-      font-family: 'Gaegu', cursive;
-      font-size: 3rem;
-      font-weight: 700;
-      color: #5a7a8a;
-      text-shadow: 
-        3px 3px 0 #fff,
-        4px 4px 0 rgba(0,0,0,0.1);
-      letter-spacing: 2px;
-      position: relative;
-      display: inline-block;
+    button:hover, select:hover {
+        background: #3a3a3a;
     }
 
-    .brand::before {
-      content: '✨';
-      position: absolute;
-      left: -40px;
-      top: -5px;
-      font-size: 1.5rem;
-    }
-
-    .brand::after {
-      content: '✨';
-      position: absolute;
-      right: -40px;
-      top: -5px;
-      font-size: 1.5rem;
-    }
-
-    .subtitle {
-      margin-top: 10px;
-      font-size: 1.2rem;
-      color: #7a9a8a;
-    }
-
-    .main {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 30px;
-      padding: 20px;
-      max-width: 1100px;
-      margin: 0 auto;
-      justify-content: center;
-    }
-
-    .player-area {
-      flex: 1;
-      min-width: 300px;
-      max-width: 550px;
-    }
-
-    .player-wrapper {
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 
-        4px 6px 0 rgba(0,0,0,0.08),
-        0 0 0 3px #f5ebe0;
-      border: 2px dashed #d4c4b0;
-      position: relative;
-    }
-
-    /* Tape on player corners */
-    .player-wrapper::before {
-      content: '';
-      position: absolute;
-      top: -10px; left: 20px;
-      width: 60px; height: 22px;
-      background: repeating-linear-gradient(45deg, #a8e6cf, #a8e6cf 4px, #c8f6df 4px, #c8f6df 8px);
-      transform: rotate(-3deg);
-      opacity: 0.8;
-      border-radius: 2px;
-    }
-
-    .player-wrapper::after {
-      content: '';
-      position: absolute;
-      bottom: -8px; right: 25px;
-      width: 55px; height: 22px;
-      background: repeating-linear-gradient(45deg, #ffd3b6, #ffd3b6 4px, #ffe6d6 4px, #ffe6d6 8px);
-      transform: rotate(5deg);
-      opacity: 0.8;
-      border-radius: 2px;
+    #screenContainer {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     desmond-player {
-      display: block;
-      width: 100%;
-      aspect-ratio: 256 / 384;
-      background: 
-        linear-gradient(180deg, #2a2a3e 0%, #1e1e2e 100%);
-      border-radius: 6px;
-      box-shadow: inset 0 3px 10px rgba(0,0,0,0.4);
-      border: 3px solid #3a3a4e;
+        display: block;
+        margin-top: 15px;
     }
 
-    .rom-list-container {
-      flex: 0 0 260px;
-      min-width: 240px;
+    #fileInput {
+        display: none;
     }
 
-    .rom-list {
-      background: 
-        linear-gradient(to bottom, #fffef9 0%, #fdfbf5 100%);
-      border-radius: 6px;
-      padding: 20px 18px;
-      box-shadow: 
-        5px 7px 0 rgba(0,0,0,0.07);
-      border: 2px solid #e8e0d5;
-      position: relative;
+    footer {
+        margin-top: 20px;
+        text-align: center;
+        opacity: 0.65;
+        font-size: 14px;
     }
-
-    /* Notebook spiral holes */
-    .rom-list::before {
-      content: '○ ○ ○ ○ ○ ○';
-      position: absolute;
-      left: -8px;
-      top: 50%;
-      transform: translateY(-50%) rotate(90deg);
-      font-size: 0.7rem;
-      color: #ccc;
-      letter-spacing: 12px;
-    }
-
-    .rom-list h2 {
-      font-family: 'Gaegu', cursive;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #6a8a7a;
-      margin-bottom: 18px;
-      padding-bottom: 12px;
-      border-bottom: 2px dashed #d4e4d4;
-      text-align: center;
-    }
-
-    .rom-item {
-      padding: 14px 16px;
-      margin-bottom: 12px;
-      background: #fff;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 2px 3px 0 rgba(0,0,0,0.06);
-      border: 2px solid #f0e8e0;
-      position: relative;
-      font-size: 1.1rem;
-      color: #5a6a6a;
-    }
-
-    .rom-item::before {
-      content: '♡';
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 1rem;
-      color: #e8b4b8;
-      transition: all 0.2s ease;
-    }
-
-    .rom-item:hover {
-      transform: translateY(-3px) rotate(-1deg);
-      box-shadow: 4px 6px 0 rgba(0,0,0,0.1);
-      border-color: #a8e6cf;
-      background: #f8fff8;
-    }
-
-    .rom-item:hover::before {
-      content: '♥';
-      color: #e87a8a;
-      transform: translateY(-50%) scale(1.2);
-    }
-
-    .rom-item:active {
-      transform: translateY(0) rotate(0);
-    }
-
-    .rom-item.active {
-      background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
-      border-color: #81c784;
-      box-shadow: 3px 4px 0 rgba(129,199,132,0.3);
-    }
-
-    .rom-item.active::before {
-      content: '★';
-      color: #ffc107;
-    }
-
-    .site-footer {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      padding: 30px 20px;
-      margin-top: 20px;
-    }
-
-    .site-footer small {
-      color: #9ab;
-      font-size: 1rem;
-      background: rgba(255,255,255,0.7);
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1px dashed #ccc;
-    }
-
-    /* Decorative paper scraps */
-    .paper-scrap {
-      position: fixed;
-      background: #fff;
-      box-shadow: 2px 3px 5px rgba(0,0,0,0.1);
-      z-index: 3;
-      padding: 8px 12px;
-      font-size: 0.85rem;
-      color: #888;
-      transform: rotate(var(--rot));
-    }
-    .scrap-1 {
-      --rot: -8deg;
-      top: 22%; left: 8%;
-      border-left: 3px solid #ffb6c1;
-    }
-    .scrap-2 {
-      --rot: 5deg;
-      bottom: 25%; right: 10%;
-      border-left: 3px solid #98d8c8;
-    }
-
-    @media (max-width: 768px) {
-      .main { flex-direction: column; }
-      .rom-list-container { order: -1; width: 100%; }
-      .brand { font-size: 2.2rem; }
-      .sticker { font-size: 1.8rem; }
-      .tape { display: none; }
-      .paper-scrap { display: none; }
-    }
-  </style>
+</style>
 </head>
+
 <body>
-  <!-- Stickers -->
-  <div class="sticker">🌸</div>
-  <div class="sticker">🎮</div>
-  <div class="sticker">⭐</div>
-  <div class="sticker">🌈</div>
-  <div class="sticker">🍀</div>
-  <div class="sticker">💫</div>
-  <div class="sticker">🦋</div>
-  <div class="sticker">🌻</div>
 
-  <!-- Washi tapes -->
-  <div class="tape tape-1"></div>
-  <div class="tape tape-2"></div>
-  <div class="tape tape-3"></div>
-  <div class="tape tape-4"></div>
+<!-- ====== NAV BAR ====== -->
+<header>
+    <h1>Nintendo DS Emulator</h1>
+    <div id="romSelectContainer">
+        <label>Select ROM:</label>
 
-  <!-- Paper scraps -->
-  <div class="paper-scrap scrap-1">play time! ♪</div>
-  <div class="paper-scrap scrap-2">memories ~</div>
+        <!-- Dropdown ROM options -->
+        <select id="romSelect">
+            <option disabled selected>Select from these options</option>
+            <option value="path-to-game.nds">Default Game</option>
+            <option value="0274 - Onegai My Melody - Yume no Kuni no Daibouken (J)(WRG).nds">Onegai My Melody - Yume no Kuni no Daibouken</option>
+            <option value="4655 - Hello Kitty - Party (US)(M6)(XenoPhobia).nds">Hello Kitty - Party</option>
+            <!-- You can add unlimited ROMs here -->
+        </select>
 
-  <header class="site-header">
-    <h1 class="brand">DS Indie Arcade</h1>
-    <p class="subtitle">pick a game & have fun ~</p>
-  </header>
+        <!-- Button triggers manual upload -->
+        <button onclick="document.getElementById('fileInput').click()">Upload ROM</button>
+        <input type="file" id="fileInput" accept=".nds"/>
+    </div>
+</header>
 
-  <main class="main">
-    <section class="player-area">
-      <div id="playerWrapper" class="player-wrapper">
-        <desmond-player id="player" tabindex="0" aria-label="Nintendo DS emulator"></desmond-player>
-      </div>
-    </section>
+<!-- ====== EMULATOR SCREENS ====== -->
+<div id="screenContainer">
+    <desmond-player id="player"></desmond-player>
+</div>
 
-    <aside class="rom-list-container" aria-label="ROM list">
-      <div id="romList" class="rom-list">
-        <h2>~ games ~</h2>
-      </div>
-    </aside>
-  </main>
+<!-- ====== FOOTER ====== -->
+<footer>
+    Desmond Emulator UI • HTML+CSS+JS Integrated
+</footer>
 
-  <footer class="site-footer">
-    <small>roms in /roms · covers in /covers ♡</small>
-  </footer>
 
-  <script src="desmond.min.js" defer></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const romList = document.getElementById('romList');
-      const player = document.getElementById('player');
+<!-- ====== DESMOND EMULATOR JS ====== -->
+<script src="desmond.min.js"></script>
 
-      // Placeholder ROM entries — edit these with your .nds files
-      const roms = [
-        { id: 'game1', title: 'Hello Kitty - Party', file: 'roms/4655 - Hello Kitty - Party (US)(M6)(XenoPhobia).nds' },
-        { id: 'game2', title: 'Onegai My Melody - Yume no Kuni no Daibouken', file: 'roms/0274 - Onegai My Melody - Yume no Kuni no Daibouken (J)(WRG).nds' },
-        { id: 'game3', title: 'Game Title 3', file: 'roms/game3.nds' },
-        { id: 'game4', title: 'Game Title 4', file: 'roms/game4.nds' },
-      ];
+<!-- ====== INTERFACE + LOGIC JS ====== -->
+<script>
+const player = document.getElementById("player");
+const romSelect = document.getElementById("romSelect");
+const fileInput = document.getElementById("fileInput");
 
-      roms.forEach(rom => {
-        const item = document.createElement('div');
-        item.className = 'rom-item';
-        item.dataset.file = rom.file;
-        item.textContent = rom.title;
-        item.addEventListener('click', () => loadRom(rom.file, item));
-        romList.appendChild(item);
-      });
-
-      function loadRom(file, element) {
-        document.querySelectorAll('.rom-item').forEach(el => el.classList.remove('active'));
-        element.classList.add('active');
-
-        if (player.loadRom) {
-          player.loadRom(file);
-        } else {
-          console.log('Loading ROM:', file);
-          player.setAttribute('src', file);
+// ---- Function: Load ROM through emulator ----
+function loadROM(path) {
+    player.loadURL(path, () => {
+        try {
+            player.enableMicrophone();
+        } catch (e) {
+            console.warn("Microphone optional:", e);
         }
-      }
     });
-  </script>
+}
+
+// ---- Dropdown ROM selection ----
+romSelect.onchange = () => {
+    loadROM(romSelect.value);
+};
+
+// ---- Manual file upload ----
+fileInput.onchange = () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    loadROM(url);
+};
+
+// ---- Optional: Autoload default ROM on startup ----
+window.onload = () => {
+    // If you want automatic loading uncomment below:
+    // loadROM("path-to-game.nds");
+};
+</script>
+
 </body>
 </html>
