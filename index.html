@@ -1,154 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Nintendo DS Emulator – Desmond Enhanced UI</title>
+<html>
 
-<!-- ====== EMBEDDED CSS ====== -->
-<style>
-    body {
-        margin: 0;
-        background: #0d0d0d;
-        font-family: Arial, sans-serif;
-        color: white;
-        overflow-x: hidden;
-    }
-
-    header {
-        width: 100%;
-        padding: 12px 20px;
-        background: #1c1c1c;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 2px solid #333;
-    }
-
-    header h1 {
-        font-size: 20px;
-        margin: 0;
-    }
-
-    #romSelectContainer {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-
-    select, button {
-        padding: 8px 12px;
-        border-radius: 6px;
-        border: none;
-        font-size: 15px;
-        background: #292929;
-        color: white;
-        cursor: pointer;
-    }
-
-    button:hover, select:hover {
-        background: #3a3a3a;
-    }
-
-    #screenContainer {
-        margin-top: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    desmond-player {
-        display: block;
-        margin-top: 15px;
-    }
-
-    #fileInput {
-        display: none;
-    }
-
-    footer {
-        margin-top: 20px;
-        text-align: center;
-        opacity: 0.65;
-        font-size: 14px;
-    }
-</style>
-</head>
-
-<body>
-
-<!-- ====== NAV BAR ====== -->
-<header>
-    <h1>Nintendo DS Emulator</h1>
-    <div id="romSelectContainer">
-        <label>Select ROM:</label>
-
-        <!-- Dropdown ROM options -->
-        <select id="romSelect">
-            <option disabled selected>Select from these options</option>
-            <option value="path-to-game.nds">Default Game</option>
-            <option value="1.nds">Onegai My Melody - Yume no Kuni no Daibouken</option>
-            <option value="2.nds">Hello Kitty - Party</option>
-            <!-- You can add unlimited ROMs here -->
-        </select>
-
-        <!-- Button triggers manual upload -->
-        <button onclick="document.getElementById('fileInput').click()">Upload ROM</button>
-        <input type="file" id="fileInput" accept=".nds"/>
-    </div>
-</header>
-
-<!-- ====== EMULATOR SCREENS ====== -->
-<div id="screenContainer">
+<title> Nintendo DS Emulator - Powered by desmond</title>
+  <body>
     <desmond-player id="player"></desmond-player>
-</div>
+    <script src="desmond.min.js"></script>
+    <script>
+    document.getElementById("player").loadURL("path-to-game.nds");
+    </script>
+  </body>
+</html>
 
-<!-- ====== FOOTER ====== -->
-<footer>
-    Desmond Emulator UI • HTML+CSS+JS Integrated
-</footer>
-
-
-<!-- ====== DESMOND EMULATOR JS ====== -->
-<script src="desmond.min.js"></script>
-
-<!-- ====== INTERFACE + LOGIC JS ====== -->
-<script>
-const player = document.getElementById("player");
-const romSelect = document.getElementById("romSelect");
-const fileInput = document.getElementById("fileInput");
-
-// ---- Function: Load ROM through emulator ----
-function loadROM(path) {
-    player.loadURL(path, () => {
-        try {
-            player.enableMicrophone();
-        } catch (e) {
-            console.warn("Microphone optional:", e);
-        }
-    });
-}
-
-// ---- Dropdown ROM selection ----
-romSelect.onchange = () => {
-    loadROM(romSelect.value);
-};
-
-// ---- Manual file upload ----
-fileInput.onchange = () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    const url = URL.createObjectURL(file);
-    loadROM(url);
-};
-
-// ---- Optional: Autoload default ROM on startup ----
-window.onload = () => {
-    // If you want automatic loading uncomment below:
-    // loadROM("path-to-game.nds");
-};
-</script>
-
+<desmond-player></desmond-player>
+ <input type="file" style="position: absolute; transform: translate(-50%, -50%); left: 50%; top: 95%; color: white;"></input>
+ <script src="desmond.min.js"></script>
+ <script>
+ document.querySelector("input").onchange = function() {
+ document.querySelector("desmond-player").loadURL(URL.createObjectURL(document.querySelector("input").files[0]))
+ }
+ 
+ window.onload = function() {
+ setTimeout(function() {
+ document.querySelector("desmond-player").loadURL("./path-to-game.nds")
+ document.querySelector("desmond-player").shadowRoot.querySelector("#top").style = "position: fixed;transform: translate(-50%, -50%);width: 40%;left: 50%;top: 30%;height: 40%;";
+ 
+ document.querySelector("desmond-player").shadowRoot.querySelector("#bottom").style = "position: fixed;transform: translate(-50%, -50%);width: 40%;left: 50%;top: 70%;height: 40%;";
+ }, 1000)
+ }
+ </script>
 </body>
 </html>
