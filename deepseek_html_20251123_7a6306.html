@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Character Runner Game</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+.container { 
+  text-align: center; 
+  width: 100%;
+  max-width: 100vw;
+  padding: 10px;
+}
+h1 { 
+  margin-bottom: 20px; 
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  text-shadow: 0 0 10px rgba(255,255,255,0.3); 
+}
+
+/* Loading Screen */
+#loading-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+#loading-screen h2 { margin-bottom: 30px; font-size: clamp(1.2rem, 4vw, 2rem); }
+#load-bar-container {
+  width: min(300px, 80vw);
+  height: 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+#load-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #00d4ff, #0099cc);
+  transition: width 0.2s;
+}
+#load-text { font-size: 0.9rem; color: #aaa; }
+
+/* Character Selection */
+#char-select {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  max-width: min(800px, 95vw);
+  margin: 0 auto 20px;
+  padding: 0 10px;
+}
+.char-option {
+  background: rgba(255,255,255,0.1);
+  border: 3px solid transparent;
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  touch-action: manipulation;
+}
+.char-option:hover, .char-option:active { 
+  background: rgba(255,255,255,0.2); 
+  transform: scale(1.05); 
+}
+.char-option.selected { 
+  border-color: #00d4ff; 
+  box-shadow: 0 0 15px rgba(0,212,255,0.5); 
+}
+.char-preview {
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 100px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.char-preview img { 
+  max-width: 100%; 
+  max-height: 100%; 
+  object-fit: contain; 
+  transition: transform 0.2s;
+}
+.char-name { 
+  margin-top: 8px; 
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
+  word-break: break-word;
+}
+
+#start-btn {
+  background: linear-gradient(45deg, #00d4ff, #0099cc);
+  border: none;
+  padding: 15px 50px;
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  color: #fff;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+  touch-action: manipulation;
+}
+#start-btn:hover, #start-btn:active { 
+  transform: scale(1.1); 
+  box-shadow: 0 0 20px rgba(0,212,255,0.6); 
+}
+#start-btn:disabled { 
+  opacity: 0.5; 
+  cursor: not-allowed; 
+  transform: none; 
+}
+
+/* Game Area - ENLARGED */
+#game-container {
+  display: none;
+  position: relative;
+  width: min(900px, 95vw);
+  height: min(500px, 60vh);
+  max-height: 500px;
+  background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 4px solid #333;
+  margin: 0 auto;
+  touch-action: none;
+}
+#ground {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  background: linear-gradient(180deg, #8B4513 0%, #654321 100%);
+}
+#score-display {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  color: #333;
+  font-weight: bold;
+  z-index: 20;
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+#player {
+  position: absolute;
+  bottom: 60px;
+  left: clamp(60px, 10vw, 100px);
+  width: clamp(60px, 10vw, 80px);
+  height: clamp(70px, 12vw, 90px);
+  z-index: 10;
+  transition: bottom 0.2s ease-out;
+}
+#player img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain; 
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+}
+.obstacle {
+  position: absolute;
+  bottom: 60px;
+  width: clamp(45px, 8vw, 65px);
+  height: clamp(55px, 10vw, 75px);
+  z-index: 5;
+}
+.obstacle img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain; 
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Game Over / Pause */
+#game-over, #pause-screen {
+  display: none;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 100;
+}
+#game-over h2, #pause-screen h2 { 
+  font-size: clamp(1.5rem, 5vw, 2.5rem); 
+  margin-bottom: 10px; 
+}
+#final-score { 
+  font-size: clamp(1.2rem, 3vw, 1.8rem); 
+  margin-bottom: 20px; 
+}
+.game-btn {
+  background: #00d4ff;
+  border: none;
+  padding: 12px 30px;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  color: #fff;
+  border-radius: 20px;
+  cursor: pointer;
+  margin: 5px;
+  touch-action: manipulation;
+}
+.game-btn:hover, .game-btn:active { 
+  background: #0099cc; 
+  transform: scale(1.05);
+}
+
+/* Controls Info */
+#controls {
+  margin-top: 15px;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
+  color: #aaa;
+}
+.key { 
+  background: #444; 
+  padding: 5px 12px; 
+  border-radius: 5px; 
+  margin: 0 3px;
+  display: inline-block;
+}
+
+/* Mobile tap indicator */
+#tap-indicator {
+  display: none;
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  z-index: 15;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Hidden preload container */
+#preload-container { 
+  position: absolute; 
+  width: 0; 
+  height: 0; 
+  overflow: hidden; 
+  opacity: 0; 
+  pointer-events: none; 
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  #char-select {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  
+  #controls {
+    display: none;
+  }
+  
+  #tap-indicator {
+    display: block;
+  }
+  
+  #game-container {
+    height: min(400px, 60vh);
+  }
+  
+  #player {
+    width: clamp(70px, 12vw, 90px);
+    height: clamp(80px, 14vw, 100px);
+  }
+  
+  .obstacle {
+    width: clamp(55px, 10vw, 75px);
+    height: clamp(65px, 12vw, 85px);
+  }
+  
+  .char-preview {
+    max-width: 90px;
+  }
+}
+
+/* Mobile landscape optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  .container {
+    padding: 5px;
+  }
+  
+  h1 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+  }
+  
+  #char-select {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .char-preview {
+    max-width: 60px;
+  }
+  
+  .char-name {
+    font-size: 0.7rem;
+  }
+  
+  #game-container {
+    height: min(300px, 80vh);
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <h2>Loading Game...</h2>
+  <div id="load-bar-container">
+    <div id="load-bar"></div>
+  </div>
+  <div id="load-text">Loading assets... 0%</div>
+</div>
+
+<!-- Hidden container for preloading images -->
+<div id="preload-container"></div>
+
+<div class="container">
+  <h1>Character Runner</h1>
+  
+  <!-- Character Selection Screen -->
+  <div id="selection-screen" style="display:none;">
+    <p style="margin-bottom:15px; font-size: clamp(0.9rem, 2.5vw, 1rem);">Select your character:</p>
+    <div id="char-select"></div>
+    <button id="start-btn" disabled>Start Game</button>
+    <div id="controls">
+      <span class="key">SPACE</span> / <span class="key">↑</span> Jump &nbsp;&nbsp;
+      <span class="key">P</span> Pause
+    </div>
+  </div>
+
+  <!-- Game Area -->
+  <div id="game-container">
+    <div id="score-display">Score: 0</div>
+    <div id="player"></div>
+    <div id="ground"></div>
+    <div id="tap-indicator">Tap to Jump!</div>
+    
+    <div id="game-over">
+      <h2>Game Over!</h2>
+      <div id="final-score">Score: 0</div>
+      <button class="game-btn" onclick="restartGame()">Play Again</button>
+      <button class="game-btn" onclick="backToMenu()">Menu</button>
+    </div>
+    
+    <div id="pause-screen">
+      <h2>⏸️ Paused</h2>
+      <button class="game-btn" onclick="resumeGame()">Resume</button>
+      <button class="game-btn" onclick="backToMenu()">Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// CHARACTER CONFIGURATION
+// ============================================
+const CHARACTERS = [
+  {
+    id: 1,
+    name: "Katsuki Bakugo~Kacchan",
+    preview: "https://files.catbox.moe/9p3us8.gif",
+    run: "https://files.catbox.moe/kwbubt.gif",
+    jump: "https://files.catbox.moe/lmohx8.gif",
+    obstacle: "https://files.catbox.moe/ywvfth.png"
+  },
+  {
+    id: 2,
+    name: "Kuromi",
+    preview: "https://files.catbox.moe/06zvox.gif",
+    run: "https://files.catbox.moe/vtmuj1.gif",
+    jump: "https://files.catbox.moe/k7myse.gif",
+    obstacle: "https://files.catbox.moe/l1g4y9.png"
+  },
+  {
+    id: 3,
+    name: "Tobio Kageyama",
+    preview: "https://files.catbox.moe/ug0scr.gif",
+    run: "https://files.catbox.moe/hiqk72.gif",
+    jump: "https://files.catbox.moe/2v9js9.gif",
+    obstacle: "https://files.catbox.moe/pw5pew.gif"
+  },
+  {
+    id: 4,
+    name: "Agent ~",
+    preview: "https://files.catbox.moe/1llpxz.gif",
+    run: "https://files.catbox.moe/rbeowx.gif",
+    jump: "https://files.catbox.moe/q4e0lt.gif",
+    obstacle: "https://files.catbox.moe/3awjm4.png"
+  },
+  {
+    id: 5,
+    name: "Daichi Sawamura",
+    preview: "https://files.catbox.moe/ogvedl.gif",
+    run: "https://files.catbox.moe/xlg18f.gif",
+    jump: "https://files.catbox.moe/p8r3y9.gif",
+    obstacle: "https://files.catbox.moe/jjq1mg.gif"
+  },
+  {
+    id: 6,
+    name: "Shōyō Hinata",
+    preview: "https://files.catbox.moe/3ulceq.gif",
+    run: "https://files.catbox.moe/fzs3p9.gif",
+    jump: "https://files.catbox.moe/7diqgf.gif",
+    obstacle: "https://files.catbox.moe/92ijhu.gif"
+  },
+  {
+    id: 7,
+    name: "Conan Gray Vogue World 25",
+    preview: "https://files.catbox.moe/mwr87f.png",
+    run: "https://files.catbox.moe/kw2ymz.gif",
+    jump: "https://files.catbox.moe/ye85f9.gif",
+    obstacle: "https://files.catbox.moe/c3ithb.png"
+  },
+  {
+    id: 8,
+    name: "All Might",
+    preview: "https://files.catbox.moe/f6fdk2.gif",
+    run: "https://files.catbox.moe/z2nukd.gif",
+    jump: "https://files.catbox.moe/bg80fv.gif",
+    obstacle: "https://files.catbox.moe/qp45uq.png"
+  },
+  {
+    id: 9,
+    name: "Toge Inumaki",
+    preview: "https://files.catbox.moe/d20ovr.gif",
+    run: "https://files.catbox.moe/h19oo3.gif",
+    jump: "https://files.catbox.moe/mvajmm.gif",
+    obstacle: "https://files.catbox.moe/mvajmm.gif"
+  }
+];
+// ============================================
+
+// Preloaded images cache
+const imageCache = {};
+
+// Game State
+let selectedChar = null;
+let score = 0;
+let gameSpeed = 5;
+let isJumping = false;
+let isGameOver = false;
+let isPaused = false;
+let gameLoop = null;
+let obstacleInterval = null;
+let obstacles = [];
+
+// DOM Elements
+const loadingScreen = document.getElementById('loading-screen');
+const loadBar = document.getElementById('load-bar');
+const loadText = document.getElementById('load-text');
+const preloadContainer = document.getElementById('preload-container');
+const charSelect = document.getElementById('char-select');
+const startBtn = document.getElementById('start-btn');
+const selectionScreen = document.getElementById('selection-screen');
+const gameContainer = document.getElementById('game-container');
+const player = document.getElementById('player');
+const scoreDisplay = document.getElementById('score-display');
+const gameOverScreen = document.getElementById('game-over');
+const finalScore = document.getElementById('final-score');
+const pauseScreen = document.getElementById('pause-screen');
+const tapIndicator = document.getElementById('tap-indicator');
+
+// ============================================
+// PRELOAD SYSTEM
+// ============================================
+function getAllGifUrls() {
+  const urls = [];
+  CHARACTERS.forEach(char => {
+    ['preview', 'run', 'jump', 'obstacle'].forEach(type => {
+      if (char[type] && char[type].trim() !== '') {
+        urls.push({ url: char[type], charId: char.id, type: type });
+      }
+    });
+  });
+  return urls;
+}
+
+function preloadImage(src) {
+  return new Promise((resolve, reject) => {
+    if (!src || src.trim() === '') {
+      resolve(null);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      imageCache[src] = img;
+      preloadContainer.appendChild(img);
+      resolve(img);
+    };
+    img.onerror = () => {
+      console.warn(`Failed to load: ${src}`);
+      resolve(null);
+    };
+    img.src = src;
+  });
+}
+
+async function preloadAllAssets() {
+  const allUrls = getAllGifUrls();
+  
+  if (allUrls.length === 0) {
+    loadBar.style.width = '100%';
+    loadText.textContent = 'Ready!';
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+      selectionScreen.style.display = 'block';
+      initCharSelect();
+    }, 300);
+    return;
+  }
+  
+  let loaded = 0;
+  const total = allUrls.length;
+  
+  for (const item of allUrls) {
+    await preloadImage(item.url);
+    loaded++;
+    const percent = Math.round((loaded / total) * 100);
+    loadBar.style.width = percent + '%';
+    loadText.textContent = `Loading assets... ${percent}% (${loaded}/${total})`;
+  }
+  
+  loadText.textContent = 'Ready!';
+  setTimeout(() => {
+    loadingScreen.style.display = 'none';
+    selectionScreen.style.display = 'block';
+    initCharSelect();
+  }, 500);
+}
+
+// ============================================
+// CHARACTER SELECTION
+// ============================================
+function initCharSelect() {
+  charSelect.innerHTML = '';
+  CHARACTERS.forEach((char, i) => {
+    const div = document.createElement('div');
+    div.className = 'char-option';
+    div.dataset.id = char.id;
+    
+    let previewContent;
+    if (char.preview && char.preview.trim() !== '') {
+      previewContent = `<img src="${char.preview}" alt="${char.name}">`;
+    } else {
+      previewContent = `<span style="font-size:1.5rem;color:#666;">?</span>`;
+    }
+    
+    div.innerHTML = `
+      <div class="char-preview">${previewContent}</div>
+      <div class="char-name">${char.name}</div>
+    `;
+    div.onclick = () => selectChar(char, div);
+    charSelect.appendChild(div);
+  });
+}
+
+function selectChar(char, el) {
+  document.querySelectorAll('.char-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedChar = char;
+  startBtn.disabled = false;
+  
+  // Preload selected character's animations
+  if (char.run) preloadImage(char.run);
+  if (char.jump) preloadImage(char.jump);
+}
+
+// Start Game
+startBtn.onclick = () => {
+  if (!selectedChar) return;
+  selectionScreen.style.display = 'none';
+  gameContainer.style.display = 'block';
+  startGame();
+};
+
+function startGame() {
+  score = 0;
+  gameSpeed = 5;
+  isGameOver = false;
+  isPaused = false;
+  obstacles = [];
+  
+  document.querySelectorAll('.obstacle').forEach(o => o.remove());
+  setPlayerAnim('run');
+  
+  // Hide tap indicator after 3 seconds
+  if (window.innerWidth <= 768) {
+    tapIndicator.style.display = 'block';
+    setTimeout(() => {
+      tapIndicator.style.display = 'none';
+    }, 3000);
+  }
+  
+  gameLoop = requestAnimationFrame(update);
+  obstacleInterval = setInterval(spawnObstacle, 2000);
+  
+  gameOverScreen.style.display = 'none';
+  pauseScreen.style.display = 'none';
+}
+
+function setPlayerAnim(type) {
+  const src = selectedChar[type];
+  if (src && src.trim() !== '') {
+    player.innerHTML = `<img src="${src}" alt="player">`;
+  } else {
+    const colors = {run:'#4CAF50',jump:'#2196F3'};
+    player.innerHTML = `<div style="width:100%;height:100%;background:${colors[type]||'#4CAF50'};border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;">${type[0].toUpperCase()}</div>`;
+  }
+}
+
+function spawnObstacle() {
+  if (isGameOver || isPaused) return;
+  
+  const others = CHARACTERS.filter(c => c.id !== selectedChar.id);
+  const obsChar = others[Math.floor(Math.random() * others.length)];
+  
+  const obs = document.createElement('div');
+  obs.className = 'obstacle';
+  obs.style.right = '-70px';
+  obs.dataset.charId = obsChar.id;
+  
+  if (obsChar.obstacle && obsChar.obstacle.trim() !== '') {
+    obs.innerHTML = `<img src="${obsChar.obstacle}" alt="obstacle">`;
+  } else {
+    obs.innerHTML = `<div style="width:100%;height:100%;background:#e91e63;border-radius:8px;"></div>`;
+  }
+  
+  gameContainer.appendChild(obs);
+  obstacles.push({ el: obs, char: obsChar, x: gameContainer.offsetWidth + 70 });
+}
+
+function update() {
+  if (isGameOver || isPaused) return;
+  
+  score++;
+  scoreDisplay.textContent = `Score: ${Math.floor(score/10)}`;
+  
+  if (score % 500 === 0) gameSpeed += 0.5;
+  
+  const containerWidth = gameContainer.offsetWidth;
+  
+  obstacles.forEach((obs, i) => {
+    obs.x -= gameSpeed;
+    obs.el.style.right = (containerWidth - obs.x) + 'px';
+    
+    if (obs.x < -80) {
+      obs.el.remove();
+      obstacles.splice(i, 1);
+    }
+    
+    if (!obs.hit) {
+      const pRect = player.getBoundingClientRect();
+      const oRect = obs.el.getBoundingClientRect();
+      
+      if (rectsCollide(pRect, oRect)) {
+        gameOver();
+      }
+    }
+  });
+  
+  gameLoop = requestAnimationFrame(update);
+}
+
+function rectsCollide(a, b) {
+  const padding = 20;
+  return !(a.right - padding < b.left + padding || 
+           a.left + padding > b.right - padding || 
+           a.bottom - padding < b.top + padding || 
+           a.top + padding > b.bottom - padding);
+}
+
+function jump() {
+  if (isJumping || isGameOver || isPaused) return;
+  isJumping = true;
+  setPlayerAnim('jump');
+  
+  let vel = 22;
+  const gravity = 0.9;
+  let pos = 60;
+  
+  const jumpLoop = setInterval(() => {
+    if (isPaused) return;
+    vel -= gravity;
+    pos += vel;
+    
+    if (pos <= 60) {
+      pos = 60;
+      clearInterval(jumpLoop);
+      isJumping = false;
+      if (!isGameOver) setPlayerAnim('run');
+    }
+    player.style.bottom = pos + 'px';
+  }, 16);
+}
+
+function gameOver() {
+  isGameOver = true;
+  cancelAnimationFrame(gameLoop);
+  clearInterval(obstacleInterval);
+  
+  setTimeout(() => {
+    finalScore.textContent = `Score: ${Math.floor(score/10)}`;
+    gameOverScreen.style.display = 'flex';
+  }, 500);
+}
+
+function restartGame() {
+  obstacles.forEach(o => o.el.remove());
+  obstacles = [];
+  player.style.bottom = '60px';
+  startGame();
+}
+
+function backToMenu() {
+  cancelAnimationFrame(gameLoop);
+  clearInterval(obstacleInterval);
+  obstacles.forEach(o => o.el.remove());
+  obstacles = [];
+  player.style.bottom = '60px';
+  gameContainer.style.display = 'none';
+  selectionScreen.style.display = 'block';
+  gameOverScreen.style.display = 'none';
+  pauseScreen.style.display = 'none';
+}
+
+function togglePause() {
+  if (isGameOver) return;
+  isPaused = !isPaused;
+  if (isPaused) {
+    pauseScreen.style.display = 'flex';
+    cancelAnimationFrame(gameLoop);
+  } else {
+    pauseScreen.style.display = 'none';
+    gameLoop = requestAnimationFrame(update);
+  }
+}
+
+function resumeGame() {
+  isPaused = false;
+  pauseScreen.style.display = 'none';
+  gameLoop = requestAnimationFrame(update);
+}
+
+// Controls
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'ArrowUp') {
+    e.preventDefault();
+    jump();
+  }
+  if (e.code === 'KeyP') {
+    togglePause();
+  }
+});
+
+// Touch controls for mobile - prevent double-tap zoom
+let lastTouchTime = 0;
+gameContainer.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const currentTime = new Date().getTime();
+  const tapLength = currentTime - lastTouchTime;
+  
+  if (tapLength < 500 && tapLength > 0) {
+    // Double tap - do nothing to prevent zoom
+    return false;
+  }
+  
+  lastTouchTime = currentTime;
+  jump();
+}, { passive: false });
+
+// Prevent context menu on long press
+gameContainer.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  return false;
+});
+
+// ============================================
+// INITIALIZE - Start preloading
+// ============================================
+preloadAllAssets();
+</script>
+</body>
+</html>
