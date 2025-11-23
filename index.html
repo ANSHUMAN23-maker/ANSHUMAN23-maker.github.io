@@ -734,4 +734,104 @@ function jump() {
   let pos = 60;
   
   const jumpLoop = setInterval(() => {
-    if
+    if (isPaused) return;
+    vel -= gravity;
+    pos += vel;
+    
+    if (pos <= 60) {
+      pos = 60;
+      clearInterval(jumpLoop);
+      isJumping = false;
+      if (!isGameOver) setPlayerAnim('run');
+    }
+    player.style.bottom = pos + 'px';
+  }, 20);
+}
+
+function gameOver() {
+  isGameOver = true;
+  cancelAnimationFrame(gameLoop);
+  clearInterval(obstacleInterval);
+  
+  setTimeout(() => {
+    finalScore.textContent = `SCORE: ${Math.floor(score/10)}`;
+    gameOverScreen.style.display = 'flex';
+  }, 500);
+}
+
+function restartGame() {
+  obstacles.forEach(o => o.el.remove());
+  obstacles = [];
+  player.style.bottom = '60px';
+  startGame();
+}
+
+function backToMenu() {
+  cancelAnimationFrame(gameLoop);
+  clearInterval(obstacleInterval);
+  obstacles.forEach(o => o.el.remove());
+  obstacles = [];
+  player.style.bottom = '60px';
+  gameContainer.style.display = 'none';
+  selectionScreen.style.display = 'block';
+  gameOverScreen.style.display = 'none';
+  pauseScreen.style.display = 'none';
+}
+
+function togglePause() {
+  if (isGameOver) return;
+  isPaused = !isPaused;
+  if (isPaused) {
+    pauseScreen.style.display = 'flex';
+  } else {
+    pauseScreen.style.display = 'none';
+    gameLoop = requestAnimationFrame(update);
+  }
+}
+
+function resumeGame() {
+  isPaused = false;
+  pauseScreen.style.display = 'none';
+  gameLoop = requestAnimationFrame(update);
+}
+
+// Controls
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'ArrowUp') {
+    e.preventDefault();
+    jump();
+  }
+  if (e.code === 'KeyP') {
+    togglePause();
+  }
+});
+
+// Touch controls for mobile - prevent double-tap zoom
+let lastTouchTime = 0;
+gameContainer.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const currentTime = new Date().getTime();
+  const tapLength = currentTime - lastTouchTime;
+  
+  if (tapLength < 500 && tapLength > 0) {
+    // Double tap - do nothing to prevent zoom
+    return false;
+  }
+  
+  lastTouchTime = currentTime;
+  jump();
+}, { passive: false });
+
+// Prevent context menu on long press
+gameContainer.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  return false;
+});
+
+// ============================================
+// INITIALIZE - Start preloading
+// ============================================
+preloadAllAssets();
+</script>
+</body>
+</html>
