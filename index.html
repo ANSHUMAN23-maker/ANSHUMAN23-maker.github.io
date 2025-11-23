@@ -1,618 +1,737 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Anime Runner Game</title>
-  
-  <!-- Preload all character assets -->
-  <link rel="preload" as="image" href="https://files.catbox.moe/9p3us8.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/kwbubt.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/owa4na.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/ywvfth.png">
-  
-  <link rel="preload" as="image" href="https://files.catbox.moe/06zvox.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/vtmuj1.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/k7myse.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/l1g4y9.png">
-  
-  <link rel="preload" as="image" href="https://files.catbox.moe/ug0scr.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/hiqk72.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/2v9js9.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/pw5pew.gif">
-  
-  <link rel="preload" as="image" href="https://files.catbox.moe/1llpxz.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/rbeowx.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/q4e0lt.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/3awjm4.png">
-  
-  <link rel="preload" as="image" href="https://files.catbox.moe/ogvedl.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/xlg18f.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/p8r3y9.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/jjq1mg.gif">
-  
-  <link rel="preload" as="image" href="https://files.catbox.moe/3ulceq.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/fzs3p9.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/7diqgf.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/92ijhu.gif">
-  
-  <link rel="preload" as="image" href="https://files.catbox.moe/mwr87f.png">
-  <link rel="preload" as="image" href="https://files.catbox.moe/kw2ymz.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/ye85f9.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/c3ithb.png">
-  
-  <link rel="preload" as="image" href="https://files.catbox.moe/f6fdk2.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/z2nukd.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/bg80fv.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/qp45uq.png">
-  
-  <link rel="preload" as="image" href="https://files.catbox.moe/d20ovr.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/h19oo3.gif">
-  <link rel="preload" as="image" href="https://files.catbox.moe/mvajmm.gif">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Character Runner Game – Indie UI</title>
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+<!-- Retro pixel font -->
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
 
-    body {
-      font-family: 'Arial', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      overflow: hidden;
-      touch-action: none;
-    }
+<style>
+/* ---------- Reset & base ---------- */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+html,body { height:100%; }
+body {
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  background: radial-gradient(1200px 600px at 10% 10%, #09101a 0%, transparent 10%),
+              linear-gradient(135deg,#0b1220 0%, #071927 100%);
+  color: #E6F7FF;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
 
-    #characterSelect {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.95);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      overflow-y: auto;
-      padding: 20px;
-    }
+/* ---------- Main frame ---------- */
+.frame {
+  width:100%;
+  max-width:980px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  align-items:center;
+}
 
-    #characterSelect h1 {
-      color: #fff;
-      font-size: 2em;
-      margin-bottom: 30px;
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-    }
+/* ---------- Header / title (indie pixel) ---------- */
+.title-wrap {
+  display:flex;
+  gap:14px;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+}
+.title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(18px, 4.5vw, 28px);
+  color: #FFD66B;
+  text-shadow:
+    0 1px 0 #0008,
+    0 6px 24px rgba(255,214,107,0.06),
+    0 0 8px rgba(255,200,80,0.12);
+  letter-spacing: 1px;
+}
+.title .accent {
+  color: #7FFFD4;
+}
+.meta {
+  font-size: 11px;
+  color: rgba(230,247,255,0.7);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing: 1px;
+}
 
-    .character-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
-      max-width: 800px;
-      width: 100%;
-      padding: 10px;
-    }
+/* ---------- Canvas-like game box (retro border) ---------- */
+.container {
+  width:100%;
+  padding: 12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
 
-    .character-card {
-      background: rgba(255, 255, 255, 0.1);
-      border: 3px solid transparent;
-      border-radius: 15px;
-      padding: 15px;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-align: center;
-    }
+/* ---------- Loading Screen (covers full viewport like original) ---------- */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  background: linear-gradient(180deg, rgba(8,10,18,0.98), rgba(2,6,14,0.98));
+  flex-direction: column;
+  gap:14px;
+  padding:20px;
+}
+#loading-screen h2 {
+  font-family: 'Press Start 2P', monospace;
+  color:#9ef3ff;
+  font-size: 14px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+#load-bar-container {
+  width: min(420px, 86vw);
+  height: 14px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(0,0,0,0.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+#load-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #7efcff, #7be0ff 60%, #53b6ff 100%);
+  transition: width 160ms linear;
+  box-shadow: 0 4px 14px rgba(80,200,255,0.08);
+}
+#load-text { font-size: 12px; color: rgba(230,247,255,0.7); }
 
-    .character-card:hover {
-      transform: scale(1.05);
-      border-color: #fff;
-      background: rgba(255, 255, 255, 0.2);
-    }
+/* ---------- Character selection (compact indie tiles) ---------- */
+#selection-screen {
+  width:100%;
+  max-width:920px;
+  display:block;
+  text-align:center;
+}
+#selection-screen p {
+  font-size:12px;
+  color: rgba(230,247,255,0.85);
+  margin-bottom:8px;
+}
+#char-select {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap:10px;
+  max-width:min(720px,95vw);
+  margin:0 auto;
+  padding:4px;
+}
+.char-option {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.06));
+  border: 2px solid rgba(0,0,0,0.45);
+  border-radius: 8px;
+  padding:8px;
+  cursor:pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  min-height:92px;
+}
+.char-option:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+.char-option.selected { border-color:#7FFFD4; box-shadow: 0 14px 36px rgba(127,255,212,0.06); transform:translateY(-6px); }
+.char-preview {
+  width:70px; height:70px; border-radius:6px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+  border: 1px solid rgba(255,255,255,0.03);
+}
+.char-preview img { width:100%; height:100%; object-fit:contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5)); }
+.char-name { font-size:10px; color:#E6F7FF; text-align:center; font-weight:700; }
 
-    .character-card img {
-      width: 100%;
-      height: 120px;
-      object-fit: contain;
-      margin-bottom: 10px;
-      border-radius: 10px;
-    }
+/* ---------- Start button (indie chip) ---------- */
+#start-btn {
+  margin-top:10px;
+  background: linear-gradient(180deg,#FFD66B,#FFB84A);
+  color:#08121a;
+  border: 2px solid rgba(2,6,10,0.6);
+  padding:10px 26px;
+  border-radius: 999px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow: 0 10px 30px rgba(255,200,90,0.06);
+  font-size:13px;
+}
+#start-btn:disabled { opacity:0.55; cursor:not-allowed; filter:grayscale(0.15); }
 
-    .character-card p {
-      color: #fff;
-      font-size: 0.9em;
-      font-weight: bold;
-    }
+/* ---------- Game area: retro monitor look ---------- */
+#game-container {
+  display: none;
+  position: relative;
+  width: min(820px, 95vw);
+  height: min(360px, 58vh);
+  max-height:520px;
+  background: linear-gradient(180deg, #71c9f6 0%, #dff7ff 100%);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto;
+  touch-action: none;
+  border: 6px solid #071226;
+  box-shadow: 0 20px 60px rgba(2,6,14,0.7), inset 0 3px 0 rgba(255,255,255,0.03);
+}
 
-    #gameContainer {
-      display: none;
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-    }
+/* inner bezel */
+#game-container::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  box-shadow: inset 0 40px 60px rgba(0,0,0,0.06), inset 0 -12px 24px rgba(255,255,255,0.01);
+}
 
-    #gameCanvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to bottom, #87ceeb 0%, #e0f6ff 100%);
-    }
+/* CRT Scanlines overlay (subtle) */
+.scanlines {
+  position:absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(0,0,0,0.02) 50%, rgba(255,255,255,0.00) 51%);
+  background-size: 100% 4px;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  opacity: 0.35;
+  z-index: 80;
+}
 
-    #ui {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      pointer-events: none;
-    }
+/* slight vignette */
+.vignette {
+  position:absolute;
+  inset:0;
+  background: radial-gradient(120% 80% at 50% 10%, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.18) 100%);
+  pointer-events:none;
+  z-index:85;
+}
 
-    .score-display {
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 1.2em;
-      font-weight: bold;
-    }
+/* ground/player/obstacle sizes kept proportionate */
+#ground { position:absolute; bottom:0; left:0; width:100%; height:60px; background: linear-gradient(180deg,#8B4513 0%, #654321 100%); z-index:30; }
+#player {
+  position:absolute;
+  bottom:60px;
+  left: clamp(60px, 10vw, 100px);
+  width: clamp(60px, 10vw, 80px);
+  height: clamp(70px, 12vw, 90px);
+  z-index:40;
+}
+#player img { width:100%; height:100%; object-fit:contain; filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.45)); }
+.obstacle { position:absolute; bottom:60px; width: clamp(45px, 8vw, 65px); height: clamp(55px, 10vw, 75px); z-index:35; }
+.obstacle img { width:100%; height:100%; object-fit:contain; filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.45)); }
 
-    #gameOver {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.9);
-      padding: 40px;
-      border-radius: 20px;
-      text-align: center;
-      color: #fff;
-    }
+/* ---------- Indie HUD (glow + pixel score) ---------- */
+#score-display {
+  position:absolute;
+  top: 12px;
+  right: 14px;
+  z-index:90;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.86));
+  color: #022026;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  box-shadow: 0 6px 30px rgba(0,200,255,0.06), 0 2px 0 rgba(255,255,255,0.5) inset;
+  border: 2px solid rgba(0,0,0,0.16);
+  letter-spacing:1px;
+}
 
-    #gameOver h2 {
-      font-size: 2em;
-      margin-bottom: 20px;
-      color: #ff6b6b;
-    }
+/* Tap hint */
+#tap-indicator {
+  display:none;
+  position:absolute;
+  bottom: 110px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index: 88;
+  background: rgba(2,6,10,0.7);
+  color:#fff;
+  padding:8px 12px;
+  border-radius:999px;
+  font-family: 'Press Start 2P', monospace;
+  font-size:10px;
+  box-shadow: 0 8px 26px rgba(0,0,0,0.5);
+}
 
-    #gameOver p {
-      font-size: 1.5em;
-      margin: 10px 0;
-    }
+/* overlays (game over & pause) with retro panel look */
+.overlay-panel {
+  display:none;
+  position:absolute;
+  inset:0;
+  background: rgba(1,5,10,0.7);
+  z-index:120;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:12px;
+  color:#fff;
+  font-family: 'Press Start 2P', monospace;
+  padding:12px;
+}
+.overlay-panel .panel {
+  background: linear-gradient(180deg,#07121a, #0f2b36);
+  padding:16px;
+  border-radius:10px;
+  border: 3px solid rgba(255,255,255,0.04);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+  text-align:center;
+}
+.game-btn {
+  background: linear-gradient(180deg,#00d4ff,#0099cc);
+  color:#031617;
+  border:none;
+  padding:10px 16px;
+  border-radius:8px;
+  font-weight:800;
+  cursor:pointer;
+  font-size:11px;
+}
+.game-btn:hover { transform: translateY(-2px); }
 
-    .btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      border: none;
-      padding: 15px 40px;
-      font-size: 1.2em;
-      border-radius: 10px;
-      cursor: pointer;
-      margin: 10px;
-      transition: transform 0.2s;
-      pointer-events: all;
-    }
+/* small text under char select */
+#controls { margin-top:10px; font-size:11px; color: rgba(230,247,255,0.7); }
 
-    .btn:active {
-      transform: scale(0.95);
-    }
+/* mobile adjustments */
+@media (max-width:768px) {
+  .frame { padding:6px; }
+  #game-container {
+    width: 100vw;
+    height: calc(100vh - 190px);
+    border-radius: 0;
+    border-width: 4px;
+  }
+  #tap-indicator { display:block; bottom: 130px; font-size:9px; }
+  #char-select { grid-template-columns: repeat(3, 1fr); gap:8px; }
+  .char-preview { width:64px; height:64px; }
+}
 
-    #instructions {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      padding: 15px 30px;
-      border-radius: 10px;
-      text-align: center;
-      animation: fadeOut 5s forwards;
-    }
+/* accessibility focus visuals */
+.char-option:focus, #start-btn:focus, .game-btn:focus {
+  outline: 3px solid rgba(127,255,212,0.12);
+  outline-offset: 3px;
+}
 
-    @keyframes fadeOut {
-      0%, 70% { opacity: 1; }
-      100% { opacity: 0; }
-    }
+/* small subtle animation on title */
+@keyframes titleGlow {
+  0% { text-shadow: 0 1px 0 #0008, 0 6px 14px rgba(255,214,107,0.02); transform: translateY(0); }
+  50% { text-shadow: 0 2px 0 #0008, 0 10px 30px rgba(255,214,107,0.08); transform: translateY(-1px); }
+  100% { text-shadow: 0 1px 0 #0008, 0 6px 14px rgba(255,214,107,0.02); transform: translateY(0); }
+}
+.title { animation: titleGlow 3.6s ease-in-out infinite; }
 
-    @media (max-width: 600px) {
-      .character-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
-      #characterSelect h1 {
-        font-size: 1.5em;
-      }
-    }
-  </style>
+/* ensure preloaded images container remains hidden */
+#preload-container { position:absolute; width:0; height:0; overflow:hidden; opacity:0; pointer-events:none; }
+</style>
 </head>
 <body>
-  <div id="characterSelect">
-    <h1>Choose Your Runner</h1>
-    <div class="character-grid" id="characterGrid"></div>
+
+<div class="frame">
+  <div class="title-wrap" style="width:100%; max-width:980px;">
+    <div class="title">Character <span class="accent">Runner</span></div>
+    <div class="meta">Indie UI • Mobile-friendly</div>
   </div>
 
-  <div id="gameContainer">
-    <canvas id="gameCanvas"></canvas>
-    <div id="ui">
-      <div class="score-display">Score: <span id="score">0</span></div>
-      <div class="score-display">High: <span id="highScore">0</span></div>
+  <div class="container">
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <h2>LOADING GAME...</h2>
+      <div id="load-bar-container"><div id="load-bar"></div></div>
+      <div id="load-text">Loading assets... 0%</div>
     </div>
-    <div id="instructions">
-      Tap or Press SPACE to Jump!
+
+    <!-- Hidden container for preloading images -->
+    <div id="preload-container"></div>
+
+    <!-- Selection -->
+    <div id="selection-screen" style="display:none;">
+      <p>Select your character</p>
+      <div id="char-select"></div>
+      <div style="margin-top:10px;">
+        <button id="start-btn" disabled>START</button>
+      </div>
+      <div id="controls">Controls: <strong>SPACE / ↑</strong> to jump • <strong>P</strong> to pause</div>
     </div>
-    <div id="gameOver">
-      <h2>Game Over!</h2>
-      <p>Score: <span id="finalScore">0</span></p>
-      <p>High Score: <span id="finalHighScore">0</span></p>
-      <button class="btn" onclick="restartGame()">Play Again</button>
-      <button class="btn" onclick="changeCharacter()">Change Character</button>
+
+    <!-- Game Area -->
+    <div id="game-container">
+      <div id="score-display">SCORE: 0</div>
+
+      <!-- Player & world -->
+      <div id="player"></div>
+      <div id="ground"></div>
+
+      <!-- Scanlines & vignette (purely visual) -->
+      <div class="scanlines" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+
+      <!-- Tap hint for mobile -->
+      <div id="tap-indicator">TAP SCREEN TO JUMP</div>
+
+      <!-- Game Over (retro panel) -->
+      <div id="game-over" class="overlay-panel" role="alert" aria-hidden="true">
+        <div class="panel">
+          <div style="font-size:12px; margin-bottom:6px;">GAME OVER</div>
+          <div id="final-score" style="font-family:'Press Start 2P', monospace; font-size:11px; margin-bottom:10px;">SCORE: 0</div>
+          <div style="display:flex; gap:8px; justify-content:center;">
+            <button class="game-btn" onclick="restartGame()">PLAY AGAIN</button>
+            <button class="game-btn" onclick="backToMenu()">MENU</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause panel -->
+      <div id="pause-screen" class="overlay-panel" role="dialog" aria-hidden="true">
+        <div class="panel">
+          <div style="font-size:12px; margin-bottom:8px;">PAUSED</div>
+          <div style="display:flex; gap:8px; justify-content:center;">
+            <button class="game-btn" onclick="resumeGame()">RESUME</button>
+            <button class="game-btn" onclick="backToMenu()">MENU</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <script>
-    /* ============================================
-       CHARACTER CONFIGURATION
-       ============================================ */
-    const CHARACTERS = [
-      {
-        id: 1,
-        name: "Katsuki Bakugo~Kacchan",
-        preview: "https://files.catbox.moe/9p3us8.gif",
-        run: "https://files.catbox.moe/kwbubt.gif",
-        jump: "https://files.catbox.moe/owa4na.gif",
-        obstacle: "https://files.catbox.moe/ywvfth.png"
-      },
-      {
-        id: 2,
-        name: "Kuromi",
-        preview: "https://files.catbox.moe/06zvox.gif",
-        run: "https://files.catbox.moe/vtmuj1.gif",
-        jump: "https://files.catbox.moe/k7myse.gif",
-        obstacle: "https://files.catbox.moe/l1g4y9.png"
-      },
-      {
-        id: 3,
-        name: "Tobio Kageyama",
-        preview: "https://files.catbox.moe/ug0scr.gif",
-        run: "https://files.catbox.moe/hiqk72.gif",
-        jump: "https://files.catbox.moe/2v9js9.gif",
-        obstacle: "https://files.catbox.moe/pw5pew.gif"
-      },
-      {
-        id: 4,
-        name: "Agent ~",
-        preview: "https://files.catbox.moe/1llpxz.gif",
-        run: "https://files.catbox.moe/rbeowx.gif",
-        jump: "https://files.catbox.moe/q4e0lt.gif",
-        obstacle: "https://files.catbox.moe/3awjm4.png"
-      },
-      {
-        id: 5,
-        name: "Daichi Sawamura",
-        preview: "https://files.catbox.moe/ogvedl.gif",
-        run: "https://files.catbox.moe/xlg18f.gif",
-        jump: "https://files.catbox.moe/p8r3y9.gif",
-        obstacle: "https://files.catbox.moe/jjq1mg.gif"
-      },
-      {
-        id: 6,
-        name: "Shōyō Hinata",
-        preview: "https://files.catbox.moe/3ulceq.gif",
-        run: "https://files.catbox.moe/fzs3p9.gif",
-        jump: "https://files.catbox.moe/7diqgf.gif",
-        obstacle: "https://files.catbox.moe/92ijhu.gif"
-      },
-      {
-        id: 7,
-        name: "Conan Gray Vogue World 25",
-        preview: "https://files.catbox.moe/mwr87f.png",
-        run: "https://files.catbox.moe/kw2ymz.gif",
-        jump: "https://files.catbox.moe/ye85f9.gif",
-        obstacle: "https://files.catbox.moe/c3ithb.png"
-      },
-      {
-        id: 8,
-        name: "All Might",
-        preview: "https://files.catbox.moe/f6fdk2.gif",
-        run: "https://files.catbox.moe/z2nukd.gif",
-        jump: "https://files.catbox.moe/bg80fv.gif",
-        obstacle: "https://files.catbox.moe/qp45uq.png"
-      },
-      {
-        id: 9,
-        name: "Toge Inumaki",
-        preview: "https://files.catbox.moe/d20ovr.gif",
-        run: "https://files.catbox.moe/h19oo3.gif",
-        jump: "https://files.catbox.moe/mvajmm.gif",
-        obstacle: "https://files.catbox.moe/mvajmm.gif"
+<script>
+/* ============================================
+   CHARACTER CONFIGURATION
+   ============================================ */
+const CHARACTERS = [
+  {
+    id: 1,
+    name: "Katsuki Bakugo~Kacchan",
+    preview: "https://files.catbox.moe/9p3us8.gif",
+    run: "https://files.catbox.moe/kwbubt.gif",
+    jump: "https://files.catbox.moe/owa4na.gif",
+    obstacle: "https://files.catbox.moe/ywvfth.png"
+  },
+  {
+    id: 2,
+    name: "Kuromi",
+    preview: "https://files.catbox.moe/06zvox.gif",
+    run: "https://files.catbox.moe/vtmuj1.gif",
+    jump: "https://files.catbox.moe/k7myse.gif",
+    obstacle: "https://files.catbox.moe/l1g4y9.png"
+  },
+  {
+    id: 3,
+    name: "Tobio Kageyama",
+    preview: "https://files.catbox.moe/ug0scr.gif",
+    run: "https://files.catbox.moe/hiqk72.gif",
+    jump: "https://files.catbox.moe/2v9js9.gif",
+    obstacle: "https://files.catbox.moe/pw5pew.gif"
+  },
+  {
+    id: 4,
+    name: "Agent ~",
+    preview: "https://files.catbox.moe/1llpxz.gif",
+    run: "https://files.catbox.moe/rbeowx.gif",
+    jump: "https://files.catbox.moe/q4e0lt.gif",
+    obstacle: "https://files.catbox.moe/3awjm4.png"
+  },
+  {
+    id: 5,
+    name: "Daichi Sawamura",
+    preview: "https://files.catbox.moe/ogvedl.gif",
+    run: "https://files.catbox.moe/xlg18f.gif",
+    jump: "https://files.catbox.moe/p8r3y9.gif",
+    obstacle: "https://files.catbox.moe/jjq1mg.gif"
+  },
+  {
+    id: 6,
+    name: "Shōyō Hinata",
+    preview: "https://files.catbox.moe/3ulceq.gif",
+    run: "https://files.catbox.moe/fzs3p9.gif",
+    jump: "https://files.catbox.moe/7diqgf.gif",
+    obstacle: "https://files.catbox.moe/92ijhu.gif"
+  },
+  {
+    id: 7,
+    name: "Conan Gray Vogue World 25",
+    preview: "https://files.catbox.moe/mwr87f.png",
+    run: "https://files.catbox.moe/kw2ymz.gif",
+    jump: "https://files.catbox.moe/ye85f9.gif",
+    obstacle: "https://files.catbox.moe/c3ithb.png"
+  },
+  {
+    id: 8,
+    name: "All Might",
+    preview: "https://files.catbox.moe/f6fdk2.gif",
+    run: "https://files.catbox.moe/z2nukd.gif",
+    jump: "https://files.catbox.moe/bg80fv.gif",
+    obstacle: "https://files.catbox.moe/qp45uq.png"
+  },
+  {
+    id: 9,
+    name: "Toge Inumaki",
+    preview: "https://files.catbox.moe/d20ovr.gif",
+    run: "https://files.catbox.moe/h19oo3.gif",
+    jump: "https://files.catbox.moe/mvajmm.gif",
+    obstacle: "https://files.catbox.moe/mvajmm.gif"
+  }
+];
+
+// Preloaded images cache
+const imageCache = {};
+
+// Game State
+let selectedChar = null;
+let score = 0;
+let gameSpeed = 5;
+let isJumping = false;
+let isGameOver = false;
+let isPaused = false;
+let gameLoop = null;
+let obstacleInterval = null;
+let obstacles = [];
+
+// DOM Elements
+const loadingScreen = document.getElementById('loading-screen');
+const loadBar = document.getElementById('load-bar');
+const loadText = document.getElementById('load-text');
+const preloadContainer = document.getElementById('preload-container');
+const charSelect = document.getElementById('char-select');
+const startBtn = document.getElementById('start-btn');
+const selectionScreen = document.getElementById('selection-screen');
+const gameContainer = document.getElementById('game-container');
+const player = document.getElementById('player');
+const scoreDisplay = document.getElementById('score-display');
+const gameOverScreen = document.getElementById('game-over');
+const finalScore = document.getElementById('final-score');
+const pauseScreen = document.getElementById('pause-screen');
+const tapIndicator = document.getElementById('tap-indicator');
+
+// ============================================
+// PRELOAD SYSTEM
+// ============================================
+function getAllGifUrls() {
+  const urls = [];
+  CHARACTERS.forEach(char => {
+    ['preview', 'run', 'jump', 'obstacle'].forEach(type => {
+      if (char[type] && char[type].trim() !== '') {
+        urls.push({ url: char[type], charId: char.id, type: type });
       }
-    ];
+    });
+  });
+  return urls;
+}
 
-    /* ============================================
-       GAME STATE
-       ============================================ */
-    let canvas, ctx;
-    let selectedCharacter = null;
-    let gameRunning = false;
-    let score = 0;
-    let highScore = parseInt(localStorage.getItem('highScore') || '0');
-    let animationId;
-
-    const game = {
-      player: {
-        x: 100,
-        y: 0,
-        width: 80,
-        height: 80,
-        velocityY: 0,
-        jumping: false,
-        runImg: null,
-        jumpImg: null
-      },
-      ground: 0,
-      gravity: 0.8,
-      jumpPower: -15,
-      obstacles: [],
-      obstacleSpeed: 6,
-      obstacleFrequency: 100,
-      frameCount: 0
+function preloadImage(src) {
+  return new Promise((resolve, reject) => {
+    if (!src || src.trim() === '') {
+      resolve(null);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      imageCache[src] = img;
+      preloadContainer.appendChild(img);
+      resolve(img);
     };
+    img.onerror = () => {
+      console.warn(`Failed to load: ${src}`);
+      resolve(null);
+    };
+    img.src = src;
+  });
+}
 
-    /* ============================================
-       INITIALIZATION
-       ============================================ */
-    function init() {
-      displayCharacterSelection();
-      document.getElementById('highScore').textContent = highScore;
-      document.addEventListener('keydown', handleKeyPress);
-      document.addEventListener('touchstart', handleTouch);
+async function preloadAllAssets() {
+  const allUrls = getAllGifUrls();
+  
+  if (allUrls.length === 0) {
+    loadBar.style.width = '100%';
+    loadText.textContent = 'Ready!';
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+      selectionScreen.style.display = 'block';
+      initCharSelect();
+    }, 300);
+    return;
+  }
+  
+  let loaded = 0;
+  const total = allUrls.length;
+  
+  for (const item of allUrls) {
+    await preloadImage(item.url);
+    loaded++;
+    const percent = Math.round((loaded / total) * 100);
+    loadBar.style.width = percent + '%';
+    loadText.textContent = `Loading assets... ${percent}% (${loaded}/${total})`;
+  }
+  
+  loadText.textContent = 'Ready!';
+  setTimeout(() => {
+    loadingScreen.style.display = 'none';
+    selectionScreen.style.display = 'block';
+    initCharSelect();
+  }, 500);
+}
+
+// ============================================
+// CHARACTER SELECTION
+// ============================================
+function initCharSelect() {
+  charSelect.innerHTML = '';
+  CHARACTERS.forEach((char, i) => {
+    const div = document.createElement('div');
+    div.className = 'char-option';
+    div.dataset.id = char.id;
+    
+    let previewContent;
+    if (char.preview && char.preview.trim() !== '') {
+      previewContent = `<img src="${char.preview}" alt="${char.name}">`;
+    } else {
+      previewContent = `<span style="font-size:1.2rem;color:#666;">?</span>`;
     }
+    
+    div.innerHTML = `
+      <div class="char-preview">${previewContent}</div>
+      <div class="char-name">${char.name}</div>
+    `;
+    div.onclick = () => selectChar(char, div);
+    charSelect.appendChild(div);
+  });
+}
 
-    function displayCharacterSelection() {
-      const grid = document.getElementById('characterGrid');
-      grid.innerHTML = '';
+function selectChar(char, el) {
+  document.querySelectorAll('.char-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedChar = char;
+  startBtn.disabled = false;
+}
+
+// Start Game
+startBtn.onclick = () => {
+  if (!selectedChar) return;
+  selectionScreen.style.display = 'none';
+  gameContainer.style.display = 'block';
+  startGame();
+};
+
+function startGame() {
+  score = 0;
+  gameSpeed = 5;
+  isGameOver = false;
+  isPaused = false;
+  obstacles = [];
+  
+  document.querySelectorAll('.obstacle').forEach(o => o.remove());
+  setPlayerAnim('run');
+  
+  // Hide tap indicator after 3 seconds
+  if (window.innerWidth <= 768) {
+    tapIndicator.style.display = 'block';
+    setTimeout(() => {
+      tapIndicator.style.display = 'none';
+    }, 3000);
+  }
+  
+  gameLoop = requestAnimationFrame(update);
+  obstacleInterval = setInterval(spawnObstacle, 2000);
+  
+  gameOverScreen.style.display = 'none';
+  pauseScreen.style.display = 'none';
+}
+
+function setPlayerAnim(type) {
+  const src = selectedChar[type];
+  if (src && src.trim() !== '') {
+    player.innerHTML = `<img src="${src}" alt="player">`;
+  } else {
+    const colors = {run:'#4CAF50',jump:'#2196F3'};
+    player.innerHTML = `<div style="width:100%;height:100%;background:${colors[type]||'#4CAF50'};border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;">${type[0].toUpperCase()}</div>`;
+  }
+}
+
+function spawnObstacle() {
+  if (isGameOver || isPaused) return;
+  
+  const others = CHARACTERS.filter(c => c.id !== selectedChar.id);
+  const obsChar = others[Math.floor(Math.random() * others.length)];
+  
+  const obs = document.createElement('div');
+  obs.className = 'obstacle';
+  obs.style.right = '-50px';
+  obs.dataset.charId = obsChar.id;
+  
+  if (obsChar.obstacle && obsChar.obstacle.trim() !== '') {
+    obs.innerHTML = `<img src="${obsChar.obstacle}" alt="obstacle">`;
+  } else {
+    obs.innerHTML = `<div style="width:100%;height:100%;background:#e91e63;border-radius:8px;"></div>`;
+  }
+  
+  gameContainer.appendChild(obs);
+  obstacles.push({ el: obs, char: obsChar, x: gameContainer.offsetWidth + 50 });
+}
+
+function update() {
+  if (isGameOver || isPaused) return;
+  
+  score++;
+  scoreDisplay.textContent = `SCORE: ${Math.floor(score/10)}`;
+  
+  if (score % 500 === 0) gameSpeed += 0.5;
+  
+  const containerWidth = gameContainer.offsetWidth;
+  
+  obstacles.forEach((obs, i) => {
+    obs.x -= gameSpeed;
+    obs.el.style.right = (containerWidth - obs.x) + 'px';
+    
+    if (obs.x < -60) {
+      obs.el.remove();
+      obstacles.splice(i, 1);
+    }
+    
+    if (!obs.hit) {
+      const pRect = player.getBoundingClientRect();
+      const oRect = obs.el.getBoundingClientRect();
       
-      CHARACTERS.forEach(char => {
-        const card = document.createElement('div');
-        card.className = 'character-card';
-        card.innerHTML = `
-          <img src="${char.preview}" alt="${char.name}">
-          <p>${char.name}</p>
-        `;
-        card.onclick = () => selectCharacter(char);
-        grid.appendChild(card);
-      });
-    }
-
-    function selectCharacter(character) {
-      selectedCharacter = character;
-      loadCharacterAssets(character);
-    }
-
-    function loadCharacterAssets(character) {
-      let loadedCount = 0;
-      const totalAssets = 3;
-
-      const runImg = new Image();
-      const jumpImg = new Image();
-      const obstacleImg = new Image();
-
-      runImg.onload = checkAllLoaded;
-      jumpImg.onload = checkAllLoaded;
-      obstacleImg.onload = checkAllLoaded;
-
-      runImg.src = character.run;
-      jumpImg.src = character.jump;
-      obstacleImg.src = character.obstacle;
-
-      game.player.runImg = runImg;
-      game.player.jumpImg = jumpImg;
-      game.obstacleImg = obstacleImg;
-
-      function checkAllLoaded() {
-        loadedCount++;
-        if (loadedCount === totalAssets) {
-          startGame();
-        }
+      if (rectsCollide(pRect, oRect)) {
+        gameOver();
       }
     }
+  });
+  
+  gameLoop = requestAnimationFrame(update);
+}
 
-    function startGame() {
-      document.getElementById('characterSelect').style.display = 'none';
-      document.getElementById('gameContainer').style.display = 'block';
-      
-      canvas = document.getElementById('gameCanvas');
-      ctx = canvas.getContext('2d');
-      
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-      
-      resetGame();
-      gameRunning = true;
-      gameLoop();
-    }
+function rectsCollide(a, b) {
+  const padding = 15;
+  return !(a.right - padding < b.left + padding || 
+           a.left + padding > b.right - padding || 
+           a.bottom - padding < b.top + padding || 
+           a.top + padding > b.bottom - padding);
+}
 
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      game.ground = canvas.height - 150;
-      game.player.y = game.ground;
-    }
-
-    function resetGame() {
-      game.player.y = game.ground;
-      game.player.velocityY = 0;
-      game.player.jumping = false;
-      game.obstacles = [];
-      game.frameCount = 0;
-      game.obstacleSpeed = 6;
-      score = 0;
-      updateScore();
-    }
-
-    /* ============================================
-       GAME LOOP
-       ============================================ */
-    function gameLoop() {
-      if (!gameRunning) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw ground
-      ctx.fillStyle = '#8B4513';
-      ctx.fillRect(0, game.ground + game.player.height, canvas.width, canvas.height);
-      
-      // Update and draw player
-      updatePlayer();
-      drawPlayer();
-      
-      // Update and draw obstacles
-      updateObstacles();
-      drawObstacles();
-      
-      // Check collisions
-      checkCollisions();
-      
-      // Spawn obstacles
-      game.frameCount++;
-      if (game.frameCount % game.obstacleFrequency === 0) {
-        spawnObstacle();
-      }
-      
-      // Increase difficulty
-      if (game.frameCount % 500 === 0) {
-        game.obstacleSpeed += 0.5;
-        game.obstacleFrequency = Math.max(60, game.obstacleFrequency - 5);
-      }
-      
-      // Update score
-      score++;
-      updateScore();
-      
-      animationId = requestAnimationFrame(gameLoop);
-    }
-
-    function updatePlayer() {
-      if (game.player.jumping) {
-        game.player.velocityY += game.gravity;
-        game.player.y += game.player.velocityY;
-        
-        if (game.player.y >= game.ground) {
-          game.player.y = game.ground;
-          game.player.velocityY = 0;
-          game.player.jumping = false;
-        }
-      }
-    }
-
-    function drawPlayer() {
-      const img = game.player.jumping ? game.player.jumpImg : game.player.runImg;
-      ctx.drawImage(img, game.player.x, game.player.y, game.player.width, game.player.height);
-    }
-
-    function jump() {
-      if (!game.player.jumping && gameRunning) {
-        game.player.jumping = true;
-        game.player.velocityY = game.jumpPower;
-      }
-    }
-
-    function spawnObstacle() {
-      const obstacle = {
-        x: canvas.width,
-        y: game.ground,
-        width: 60,
-        height: 60
-      };
-      game.obstacles.push(obstacle);
-    }
-
-    function updateObstacles() {
-      for (let i = game.obstacles.length - 1; i >= 0; i--) {
-        game.obstacles[i].x -= game.obstacleSpeed;
-        
-        if (game.obstacles[i].x + game.obstacles[i].width < 0) {
-          game.obstacles.splice(i, 1);
-        }
-      }
-    }
-
-    function drawObstacles() {
-      game.obstacles.forEach(obs => {
-        ctx.drawImage(game.obstacleImg, obs.x, obs.y, obs.width, obs.height);
-      });
-    }
-
-    function checkCollisions() {
-      for (let obs of game.obstacles) {
-        if (game.player.x < obs.x + obs.width &&
-            game.player.x + game.player.width > obs.x &&
-            game.player.y < obs.y + obs.height &&
-            game.player.y + game.player.height > obs.y) {
-          endGame();
-          return;
-        }
-      }
-    }
-
-    function endGame() {
-      gameRunning = false;
-      cancelAnimationFrame(animationId);
-      
-      const finalScore = Math.floor(score / 10);
-      if (finalScore > highScore) {
-        highScore = finalScore;
-        localStorage.setItem('highScore', highScore.toString());
-      }
-      
-      document.getElementById('finalScore').textContent = finalScore;
-      document.getElementById('finalHighScore').textContent = highScore;
-      document.getElementById('gameOver').style.display = 'block';
-    }
-
-    function updateScore() {
-      document.getElementById('score').textContent = Math.floor(score / 10);
-      document.getElementById('highScore').textContent = highScore;
-    }
-
-    /* ============================================
-       INPUT HANDLERS
-       ============================================ */
-    function handleKeyPress(e) {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        jump();
-      }
-    }
-
-    function handleTouch(e) {
-      e.preventDefault();
-      jump();
-    }
-
-    function restartGame() {
-      document.getElementById('gameOver').style.display = 'none';
-      resetGame();
-      gameRunning = true;
-      gameLoop();
-    }
-
-    function changeCharacter() {
-      document.getElementById('gameOver').style.display = 'none';
-      document.getElementById('gameContainer').style.display = 'none';
-      document.getElementById('characterSelect').style.display = 'flex';
-      gameRunning = false;
-      cancelAnimationFrame(animationId);
-    }
-
-    // Start the game
-    init();
-  </script>
-</body>
-</html>
+function jump() {
+  if (isJumping || isGameOver || isPaused) return;
+  isJumping = true;
+  setPlayerAnim('jump');
+  
+  let vel = 18;
+  const gravity = 0.8;
+  let pos = 60;
+  
+  const jumpLoop = setInterval(() => {
+    if
