@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Anime Runner Game</title>
+  
+  <!-- Preload all character assets -->
+  <link rel="preload" as="image" href="https://files.catbox.moe/9p3us8.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/kwbubt.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/owa4na.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/ywvfth.png">
+  
+  <link rel="preload" as="image" href="https://files.catbox.moe/06zvox.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/vtmuj1.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/k7myse.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/l1g4y9.png">
+  
+  <link rel="preload" as="image" href="https://files.catbox.moe/ug0scr.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/hiqk72.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/2v9js9.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/pw5pew.gif">
+  
+  <link rel="preload" as="image" href="https://files.catbox.moe/1llpxz.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/rbeowx.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/q4e0lt.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/3awjm4.png">
+  
+  <link rel="preload" as="image" href="https://files.catbox.moe/ogvedl.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/xlg18f.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/p8r3y9.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/jjq1mg.gif">
+  
+  <link rel="preload" as="image" href="https://files.catbox.moe/3ulceq.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/fzs3p9.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/7diqgf.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/92ijhu.gif">
+  
+  <link rel="preload" as="image" href="https://files.catbox.moe/mwr87f.png">
+  <link rel="preload" as="image" href="https://files.catbox.moe/kw2ymz.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/ye85f9.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/c3ithb.png">
+  
+  <link rel="preload" as="image" href="https://files.catbox.moe/f6fdk2.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/z2nukd.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/bg80fv.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/qp45uq.png">
+  
+  <link rel="preload" as="image" href="https://files.catbox.moe/d20ovr.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/h19oo3.gif">
+  <link rel="preload" as="image" href="https://files.catbox.moe/mvajmm.gif">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #characterSelect {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    #characterSelect h1 {
+      color: #fff;
+      font-size: 2em;
+      margin-bottom: 30px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .character-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      max-width: 800px;
+      width: 100%;
+      padding: 10px;
+    }
+
+    .character-card {
+      background: rgba(255, 255, 255, 0.1);
+      border: 3px solid transparent;
+      border-radius: 15px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .character-card:hover {
+      transform: scale(1.05);
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .character-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: contain;
+      margin-bottom: 10px;
+      border-radius: 10px;
+    }
+
+    .character-card p {
+      color: #fff;
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+
+    #gameContainer {
+      display: none;
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #87ceeb 0%, #e0f6ff 100%);
+    }
+
+    #ui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .score-display {
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    #gameOver {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      color: #fff;
+    }
+
+    #gameOver h2 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      color: #ff6b6b;
+    }
+
+    #gameOver p {
+      font-size: 1.5em;
+      margin: 10px 0;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+      transition: transform 0.2s;
+      pointer-events: all;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    #instructions {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 15px 30px;
+      border-radius: 10px;
+      text-align: center;
+      animation: fadeOut 5s forwards;
+    }
+
+    @keyframes fadeOut {
+      0%, 70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      .character-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      #characterSelect h1 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="characterSelect">
+    <h1>Choose Your Runner</h1>
+    <div class="character-grid" id="characterGrid"></div>
+  </div>
+
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui">
+      <div class="score-display">Score: <span id="score">0</span></div>
+      <div class="score-display">High: <span id="highScore">0</span></div>
+    </div>
+    <div id="instructions">
+      Tap or Press SPACE to Jump!
+    </div>
+    <div id="gameOver">
+      <h2>Game Over!</h2>
+      <p>Score: <span id="finalScore">0</span></p>
+      <p>High Score: <span id="finalHighScore">0</span></p>
+      <button class="btn" onclick="restartGame()">Play Again</button>
+      <button class="btn" onclick="changeCharacter()">Change Character</button>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================
+       CHARACTER CONFIGURATION
+       ============================================ */
+    const CHARACTERS = [
+      {
+        id: 1,
+        name: "Katsuki Bakugo~Kacchan",
+        preview: "https://files.catbox.moe/9p3us8.gif",
+        run: "https://files.catbox.moe/kwbubt.gif",
+        jump: "https://files.catbox.moe/owa4na.gif",
+        obstacle: "https://files.catbox.moe/ywvfth.png"
+      },
+      {
+        id: 2,
+        name: "Kuromi",
+        preview: "https://files.catbox.moe/06zvox.gif",
+        run: "https://files.catbox.moe/vtmuj1.gif",
+        jump: "https://files.catbox.moe/k7myse.gif",
+        obstacle: "https://files.catbox.moe/l1g4y9.png"
+      },
+      {
+        id: 3,
+        name: "Tobio Kageyama",
+        preview: "https://files.catbox.moe/ug0scr.gif",
+        run: "https://files.catbox.moe/hiqk72.gif",
+        jump: "https://files.catbox.moe/2v9js9.gif",
+        obstacle: "https://files.catbox.moe/pw5pew.gif"
+      },
+      {
+        id: 4,
+        name: "Agent ~",
+        preview: "https://files.catbox.moe/1llpxz.gif",
+        run: "https://files.catbox.moe/rbeowx.gif",
+        jump: "https://files.catbox.moe/q4e0lt.gif",
+        obstacle: "https://files.catbox.moe/3awjm4.png"
+      },
+      {
+        id: 5,
+        name: "Daichi Sawamura",
+        preview: "https://files.catbox.moe/ogvedl.gif",
+        run: "https://files.catbox.moe/xlg18f.gif",
+        jump: "https://files.catbox.moe/p8r3y9.gif",
+        obstacle: "https://files.catbox.moe/jjq1mg.gif"
+      },
+      {
+        id: 6,
+        name: "Shōyō Hinata",
+        preview: "https://files.catbox.moe/3ulceq.gif",
+        run: "https://files.catbox.moe/fzs3p9.gif",
+        jump: "https://files.catbox.moe/7diqgf.gif",
+        obstacle: "https://files.catbox.moe/92ijhu.gif"
+      },
+      {
+        id: 7,
+        name: "Conan Gray Vogue World 25",
+        preview: "https://files.catbox.moe/mwr87f.png",
+        run: "https://files.catbox.moe/kw2ymz.gif",
+        jump: "https://files.catbox.moe/ye85f9.gif",
+        obstacle: "https://files.catbox.moe/c3ithb.png"
+      },
+      {
+        id: 8,
+        name: "All Might",
+        preview: "https://files.catbox.moe/f6fdk2.gif",
+        run: "https://files.catbox.moe/z2nukd.gif",
+        jump: "https://files.catbox.moe/bg80fv.gif",
+        obstacle: "https://files.catbox.moe/qp45uq.png"
+      },
+      {
+        id: 9,
+        name: "Toge Inumaki",
+        preview: "https://files.catbox.moe/d20ovr.gif",
+        run: "https://files.catbox.moe/h19oo3.gif",
+        jump: "https://files.catbox.moe/mvajmm.gif",
+        obstacle: "https://files.catbox.moe/mvajmm.gif"
+      }
+    ];
+
+    /* ============================================
+       GAME STATE
+       ============================================ */
+    let canvas, ctx;
+    let selectedCharacter = null;
+    let gameRunning = false;
+    let score = 0;
+    let highScore = parseInt(localStorage.getItem('highScore') || '0');
+    let animationId;
+
+    const game = {
+      player: {
+        x: 100,
+        y: 0,
+        width: 80,
+        height: 80,
+        velocityY: 0,
+        jumping: false,
+        runImg: null,
+        jumpImg: null
+      },
+      ground: 0,
+      gravity: 0.8,
+      jumpPower: -15,
+      obstacles: [],
+      obstacleSpeed: 6,
+      obstacleFrequency: 100,
+      frameCount: 0
+    };
+
+    /* ============================================
+       INITIALIZATION
+       ============================================ */
+    function init() {
+      displayCharacterSelection();
+      document.getElementById('highScore').textContent = highScore;
+      document.addEventListener('keydown', handleKeyPress);
+      document.addEventListener('touchstart', handleTouch);
+    }
+
+    function displayCharacterSelection() {
+      const grid = document.getElementById('characterGrid');
+      grid.innerHTML = '';
+      
+      CHARACTERS.forEach(char => {
+        const card = document.createElement('div');
+        card.className = 'character-card';
+        card.innerHTML = `
+          <img src="${char.preview}" alt="${char.name}">
+          <p>${char.name}</p>
+        `;
+        card.onclick = () => selectCharacter(char);
+        grid.appendChild(card);
+      });
+    }
+
+    function selectCharacter(character) {
+      selectedCharacter = character;
+      loadCharacterAssets(character);
+    }
+
+    function loadCharacterAssets(character) {
+      let loadedCount = 0;
+      const totalAssets = 3;
+
+      const runImg = new Image();
+      const jumpImg = new Image();
+      const obstacleImg = new Image();
+
+      runImg.onload = checkAllLoaded;
+      jumpImg.onload = checkAllLoaded;
+      obstacleImg.onload = checkAllLoaded;
+
+      runImg.src = character.run;
+      jumpImg.src = character.jump;
+      obstacleImg.src = character.obstacle;
+
+      game.player.runImg = runImg;
+      game.player.jumpImg = jumpImg;
+      game.obstacleImg = obstacleImg;
+
+      function checkAllLoaded() {
+        loadedCount++;
+        if (loadedCount === totalAssets) {
+          startGame();
+        }
+      }
+    }
+
+    function startGame() {
+      document.getElementById('characterSelect').style.display = 'none';
+      document.getElementById('gameContainer').style.display = 'block';
+      
+      canvas = document.getElementById('gameCanvas');
+      ctx = canvas.getContext('2d');
+      
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      
+      resetGame();
+      gameRunning = true;
+      gameLoop();
+    }
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      game.ground = canvas.height - 150;
+      game.player.y = game.ground;
+    }
+
+    function resetGame() {
+      game.player.y = game.ground;
+      game.player.velocityY = 0;
+      game.player.jumping = false;
+      game.obstacles = [];
+      game.frameCount = 0;
+      game.obstacleSpeed = 6;
+      score = 0;
+      updateScore();
+    }
+
+    /* ============================================
+       GAME LOOP
+       ============================================ */
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw ground
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(0, game.ground + game.player.height, canvas.width, canvas.height);
+      
+      // Update and draw player
+      updatePlayer();
+      drawPlayer();
+      
+      // Update and draw obstacles
+      updateObstacles();
+      drawObstacles();
+      
+      // Check collisions
+      checkCollisions();
+      
+      // Spawn obstacles
+      game.frameCount++;
+      if (game.frameCount % game.obstacleFrequency === 0) {
+        spawnObstacle();
+      }
+      
+      // Increase difficulty
+      if (game.frameCount % 500 === 0) {
+        game.obstacleSpeed += 0.5;
+        game.obstacleFrequency = Math.max(60, game.obstacleFrequency - 5);
+      }
+      
+      // Update score
+      score++;
+      updateScore();
+      
+      animationId = requestAnimationFrame(gameLoop);
+    }
+
+    function updatePlayer() {
+      if (game.player.jumping) {
+        game.player.velocityY += game.gravity;
+        game.player.y += game.player.velocityY;
+        
+        if (game.player.y >= game.ground) {
+          game.player.y = game.ground;
+          game.player.velocityY = 0;
+          game.player.jumping = false;
+        }
+      }
+    }
+
+    function drawPlayer() {
+      const img = game.player.jumping ? game.player.jumpImg : game.player.runImg;
+      ctx.drawImage(img, game.player.x, game.player.y, game.player.width, game.player.height);
+    }
+
+    function jump() {
+      if (!game.player.jumping && gameRunning) {
+        game.player.jumping = true;
+        game.player.velocityY = game.jumpPower;
+      }
+    }
+
+    function spawnObstacle() {
+      const obstacle = {
+        x: canvas.width,
+        y: game.ground,
+        width: 60,
+        height: 60
+      };
+      game.obstacles.push(obstacle);
+    }
+
+    function updateObstacles() {
+      for (let i = game.obstacles.length - 1; i >= 0; i--) {
+        game.obstacles[i].x -= game.obstacleSpeed;
+        
+        if (game.obstacles[i].x + game.obstacles[i].width < 0) {
+          game.obstacles.splice(i, 1);
+        }
+      }
+    }
+
+    function drawObstacles() {
+      game.obstacles.forEach(obs => {
+        ctx.drawImage(game.obstacleImg, obs.x, obs.y, obs.width, obs.height);
+      });
+    }
+
+    function checkCollisions() {
+      for (let obs of game.obstacles) {
+        if (game.player.x < obs.x + obs.width &&
+            game.player.x + game.player.width > obs.x &&
+            game.player.y < obs.y + obs.height &&
+            game.player.y + game.player.height > obs.y) {
+          endGame();
+          return;
+        }
+      }
+    }
+
+    function endGame() {
+      gameRunning = false;
+      cancelAnimationFrame(animationId);
+      
+      const finalScore = Math.floor(score / 10);
+      if (finalScore > highScore) {
+        highScore = finalScore;
+        localStorage.setItem('highScore', highScore.toString());
+      }
+      
+      document.getElementById('finalScore').textContent = finalScore;
+      document.getElementById('finalHighScore').textContent = highScore;
+      document.getElementById('gameOver').style.display = 'block';
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = Math.floor(score / 10);
+      document.getElementById('highScore').textContent = highScore;
+    }
+
+    /* ============================================
+       INPUT HANDLERS
+       ============================================ */
+    function handleKeyPress(e) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        jump();
+      }
+    }
+
+    function handleTouch(e) {
+      e.preventDefault();
+      jump();
+    }
+
+    function restartGame() {
+      document.getElementById('gameOver').style.display = 'none';
+      resetGame();
+      gameRunning = true;
+      gameLoop();
+    }
+
+    function changeCharacter() {
+      document.getElementById('gameOver').style.display = 'none';
+      document.getElementById('gameContainer').style.display = 'none';
+      document.getElementById('characterSelect').style.display = 'flex';
+      gameRunning = false;
+      cancelAnimationFrame(animationId);
+    }
+
+    // Start the game
+    init();
+  </script>
+</body>
+</html>
