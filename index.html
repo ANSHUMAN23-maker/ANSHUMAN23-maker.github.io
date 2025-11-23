@@ -1,837 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Character Runner Game – Indie UI</title>
-
-<!-- Retro pixel font -->
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
-
+<title>Anime Run: Ultimate</title>
 <style>
-/* ---------- Reset & base ---------- */
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-html,body { height:100%; }
-body {
-  font-family: "Inter", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
-  background: radial-gradient(1200px 600px at 10% 10%, #09101a 0%, transparent 10%),
-              linear-gradient(135deg,#0b1220 0%, #071927 100%);
-  color: #E6F7FF;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  overflow:hidden;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
+    /* --- CSS RESET & VARIABLES --- */
+    :root {
+        --bg-sky: #87CEEB;
+        --bg-ground: #4a4a4a;
+        --accent: #ff4757;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    
+    body {
+        background: #222;
+        font-family: sans-serif;
+        overflow: hidden; /* Prevent scroll */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100vw;
+    }
 
-/* ---------- Main frame ---------- */
-.frame {
-  width:100%;
-  max-width:980px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  align-items:center;
-}
+    /* --- GAME CONTAINER (Mobile Portrait Fixed) --- */
+    #game-container {
+        position: relative;
+        width: 100%;
+        max-width: 450px; /* Mobile portrait limit */
+        height: 100%;
+        max-height: 900px;
+        background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%);
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
 
-/* ---------- Header / title (indie pixel) ---------- */
-.title-wrap {
-  display:flex;
-  gap:14px;
-  align-items:center;
-  justify-content:space-between;
-  width:100%;
-}
-.title {
-  font-family: 'Press Start 2P', monospace;
-  font-size: clamp(18px, 4.5vw, 28px);
-  color: #FFD66B;
-  text-shadow:
-    0 1px 0 #0008,
-    0 6px 24px rgba(255,214,107,0.06),
-    0 0 8px rgba(255,200,80,0.12);
-  letter-spacing: 1px;
-}
-.title .accent {
-  color: #7FFFD4;
-}
-.meta {
-  font-size: 11px;
-  color: rgba(230,247,255,0.7);
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing: 1px;
-}
+    /* --- SCREENS --- */
+    .screen {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        background: rgba(255,255,255,0.95);
+        transition: opacity 0.3s;
+    }
+    .hidden { display: none !important; }
 
-/* ---------- Canvas-like game box (retro border) ---------- */
-.container {
-  width:100%;
-  padding: 12px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:12px;
-}
+    /* --- PRELOADER --- */
+    #loader-bar-bg {
+        width: 80%; height: 20px; background: #ccc; 
+        border-radius: 10px; margin-top: 20px; overflow: hidden;
+    }
+    #loader-bar {
+        width: 0%; height: 100%; background: var(--accent); 
+        transition: width 0.2s;
+    }
 
-/* ---------- Loading Screen (covers full viewport like original) ---------- */
-#loading-screen {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  background: linear-gradient(180deg, rgba(8,10,18,0.98), rgba(2,6,14,0.98));
-  flex-direction: column;
-  gap:14px;
-  padding:20px;
-}
-#loading-screen h2 {
-  font-family: 'Press Start 2P', monospace;
-  color:#9ef3ff;
-  font-size: 14px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
-}
-#load-bar-container {
-  width: min(420px, 86vw);
-  height: 14px;
-  background: rgba(255,255,255,0.04);
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid rgba(0,0,0,0.35);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-}
-#load-bar {
-  width: 0%;
-  height: 100%;
-  background: linear-gradient(90deg, #7efcff, #7be0ff 60%, #53b6ff 100%);
-  transition: width 160ms linear;
-  box-shadow: 0 4px 14px rgba(80,200,255,0.08);
-}
-#load-text { font-size: 12px; color: rgba(230,247,255,0.7); }
+    /* --- CHARACTER SELECT --- */
+    #char-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 10px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    .char-card {
+        background: #fff; border: 2px solid #ddd; border-radius: 8px;
+        padding: 5px; text-align: center; cursor: pointer;
+        transition: 0.2s;
+    }
+    .char-card:active { transform: scale(0.95); border-color: var(--accent); }
+    .char-card img { width: 60px; height: 60px; object-fit: contain; }
+    .char-card p { font-size: 10px; margin-top: 5px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* ---------- Character selection (compact indie tiles) ---------- */
-#selection-screen {
-  width:100%;
-  max-width:920px;
-  display:block;
-  text-align:center;
-}
-#selection-screen p {
-  font-size:12px;
-  color: rgba(230,247,255,0.85);
-  margin-bottom:8px;
-}
-#char-select {
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
-  gap:10px;
-  max-width:min(720px,95vw);
-  margin:0 auto;
-  padding:4px;
-}
-.char-option {
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.06));
-  border: 2px solid rgba(0,0,0,0.45);
-  border-radius: 8px;
-  padding:8px;
-  cursor:pointer;
-  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-  min-height:92px;
-}
-.char-option:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
-.char-option.selected { border-color:#7FFFD4; box-shadow: 0 14px 36px rgba(127,255,212,0.06); transform:translateY(-6px); }
-.char-preview {
-  width:70px; height:70px; border-radius:6px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));
-  display:flex; align-items:center; justify-content:center; overflow:hidden;
-  border: 1px solid rgba(255,255,255,0.03);
-}
-.char-preview img { width:100%; height:100%; object-fit:contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5)); }
-.char-name { font-size:10px; color:#E6F7FF; text-align:center; font-weight:700; }
+    /* --- GAMEPLAY LAYER --- */
+    #ground {
+        position: absolute; bottom: 0; width: 100%; height: 15%;
+        background: var(--bg-ground); border-top: 4px solid #333;
+        z-index: 10;
+    }
+    
+    #score-hud {
+        position: absolute; top: 20px; right: 20px;
+        font-size: 30px; font-weight: 900; color: #333; z-index: 50;
+        background: rgba(255,255,255,0.7); padding: 5px 15px; border-radius: 20px;
+    }
 
-/* ---------- Start button (indie chip) ---------- */
-#start-btn {
-  margin-top:10px;
-  background: linear-gradient(180deg,#FFD66B,#FFB84A);
-  color:#08121a;
-  border: 2px solid rgba(2,6,10,0.6);
-  padding:10px 26px;
-  border-radius: 999px;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow: 0 10px 30px rgba(255,200,90,0.06);
-  font-size:13px;
-}
-#start-btn:disabled { opacity:0.55; cursor:not-allowed; filter:grayscale(0.15); }
+    /* --- ENTITIES --- */
+    .entity { position: absolute; bottom: 15%; z-index: 20; }
+    
+    #player {
+        left: 30px; width: 80px; height: 80px;
+    }
+    #player img { width: 100%; height: 100%; object-fit: contain; }
 
-/* ---------- Game area: retro monitor look ---------- */
-#game-container {
-  display: none;
-  position: relative;
-  width: min(820px, 95vw);
-  height: min(360px, 58vh);
-  max-height:520px;
-  background: linear-gradient(180deg, #71c9f6 0%, #dff7ff 100%);
-  border-radius: 10px;
-  overflow: hidden;
-  margin: 0 auto;
-  touch-action: none;
-  border: 6px solid #071226;
-  box-shadow: 0 20px 60px rgba(2,6,14,0.7), inset 0 3px 0 rgba(255,255,255,0.03);
-}
+    /* Jump Animation */
+    .animate-jump { animation: jumpArc 0.8s linear; }
+    @keyframes jumpArc {
+        0% { bottom: 15%; }
+        40% { bottom: 45%; } /* Peak */
+        60% { bottom: 45%; } /* Hang time */
+        100% { bottom: 15%; }
+    }
 
-/* inner bezel */
-#game-container::before {
-  content: "";
-  position: absolute;
-  inset: 8px;
-  border-radius: 6px;
-  pointer-events: none;
-  box-shadow: inset 0 40px 60px rgba(0,0,0,0.06), inset 0 -12px 24px rgba(255,255,255,0.01);
-}
+    .obstacle {
+        width: 60px; height: 60px;
+        left: 100%; /* Start off screen right */
+    }
+    .obstacle img { width: 100%; height: 100%; object-fit: contain; }
 
-/* CRT Scanlines overlay (subtle) */
-.scanlines {
-  position:absolute;
-  inset: 0;
-  background-image: linear-gradient(rgba(0,0,0,0.02) 50%, rgba(255,255,255,0.00) 51%);
-  background-size: 100% 4px;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  opacity: 0.35;
-  z-index: 80;
-}
+    /* --- GAME OVER --- */
+    #go-title { color: var(--accent); font-size: 40px; font-weight: 900; margin-bottom: 10px; }
+    button.btn {
+        margin-top: 20px; padding: 15px 40px; background: var(--accent); color: white;
+        border: none; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer;
+        box-shadow: 0 4px 0 #c0392b;
+    }
+    button.btn:active { transform: translateY(4px); box-shadow: none; }
 
-/* slight vignette */
-.vignette {
-  position:absolute;
-  inset:0;
-  background: radial-gradient(120% 80% at 50% 10%, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.18) 100%);
-  pointer-events:none;
-  z-index:85;
-}
-
-/* ground/player/obstacle sizes kept proportionate */
-#ground { position:absolute; bottom:0; left:0; width:100%; height:60px; background: linear-gradient(180deg,#8B4513 0%, #654321 100%); z-index:30; }
-#player {
-  position:absolute;
-  bottom:60px;
-  left: clamp(60px, 10vw, 100px);
-  width: clamp(60px, 10vw, 80px);
-  height: clamp(70px, 12vw, 90px);
-  z-index:40;
-}
-#player img { width:100%; height:100%; object-fit:contain; filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.45)); }
-.obstacle { position:absolute; bottom:60px; width: clamp(45px, 8vw, 65px); height: clamp(55px, 10vw, 75px); z-index:35; }
-.obstacle img { width:100%; height:100%; object-fit:contain; filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.45)); }
-
-/* ---------- Indie HUD (glow + pixel score) ---------- */
-#score-display {
-  position:absolute;
-  top: 12px;
-  right: 14px;
-  z-index:90;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.86));
-  color: #022026;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 12px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  box-shadow: 0 6px 30px rgba(0,200,255,0.06), 0 2px 0 rgba(255,255,255,0.5) inset;
-  border: 2px solid rgba(0,0,0,0.16);
-  letter-spacing:1px;
-}
-
-/* Tap hint */
-#tap-indicator {
-  display:none;
-  position:absolute;
-  bottom: 110px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index: 88;
-  background: rgba(2,6,10,0.7);
-  color:#fff;
-  padding:8px 12px;
-  border-radius:999px;
-  font-family: 'Press Start 2P', monospace;
-  font-size:10px;
-  box-shadow: 0 8px 26px rgba(0,0,0,0.5);
-}
-
-/* overlays (game over & pause) with retro panel look */
-.overlay-panel {
-  display:none;
-  position:absolute;
-  inset:0;
-  background: rgba(1,5,10,0.7);
-  z-index:120;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  gap:12px;
-  color:#fff;
-  font-family: 'Press Start 2P', monospace;
-  padding:12px;
-}
-.overlay-panel .panel {
-  background: linear-gradient(180deg,#07121a, #0f2b36);
-  padding:16px;
-  border-radius:10px;
-  border: 3px solid rgba(255,255,255,0.04);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
-  text-align:center;
-}
-.game-btn {
-  background: linear-gradient(180deg,#00d4ff,#0099cc);
-  color:#031617;
-  border:none;
-  padding:10px 16px;
-  border-radius:8px;
-  font-weight:800;
-  cursor:pointer;
-  font-size:11px;
-}
-.game-btn:hover { transform: translateY(-2px); }
-
-/* small text under char select */
-#controls { margin-top:10px; font-size:11px; color: rgba(230,247,255,0.7); }
-
-/* mobile adjustments */
-@media (max-width:768px) {
-  .frame { padding:6px; }
-  #game-container {
-    width: 100vw;
-    height: calc(100vh - 190px);
-    border-radius: 0;
-    border-width: 4px;
-  }
-  #tap-indicator { display:block; bottom: 130px; font-size:9px; }
-  #char-select { grid-template-columns: repeat(3, 1fr); gap:8px; }
-  .char-preview { width:64px; height:64px; }
-}
-
-/* accessibility focus visuals */
-.char-option:focus, #start-btn:focus, .game-btn:focus {
-  outline: 3px solid rgba(127,255,212,0.12);
-  outline-offset: 3px;
-}
-
-/* small subtle animation on title */
-@keyframes titleGlow {
-  0% { text-shadow: 0 1px 0 #0008, 0 6px 14px rgba(255,214,107,0.02); transform: translateY(0); }
-  50% { text-shadow: 0 2px 0 #0008, 0 10px 30px rgba(255,214,107,0.08); transform: translateY(-1px); }
-  100% { text-shadow: 0 1px 0 #0008, 0 6px 14px rgba(255,214,107,0.02); transform: translateY(0); }
-}
-.title { animation: titleGlow 3.6s ease-in-out infinite; }
-
-/* ensure preloaded images container remains hidden */
-#preload-container { position:absolute; width:0; height:0; overflow:hidden; opacity:0; pointer-events:none; }
 </style>
 </head>
 <body>
 
-<div class="frame">
-  <div class="title-wrap" style="width:100%; max-width:980px;">
-    <div class="title">Character <span class="accent">Runner</span></div>
-    <div class="meta">Indie UI • Mobile-friendly</div>
-  </div>
-
-  <div class="container">
-    <!-- Loading Screen -->
-    <div id="loading-screen">
-      <h2>LOADING GAME...</h2>
-      <div id="load-bar-container"><div id="load-bar"></div></div>
-      <div id="load-text">Loading assets... 0%</div>
+<div id="game-container">
+    <div id="screen-loading" class="screen">
+        <h2>Loading Assets...</h2>
+        <div id="loader-bar-bg"><div id="loader-bar"></div></div>
+        <p id="loader-text" style="margin-top:10px; font-weight:bold;">0%</p>
     </div>
 
-    <!-- Hidden container for preloading images -->
-    <div id="preload-container"></div>
-
-    <!-- Selection -->
-    <div id="selection-screen" style="display:none;">
-      <p>Select your character</p>
-      <div id="char-select"></div>
-      <div style="margin-top:10px;">
-        <button id="start-btn" disabled>START</button>
-      </div>
-      <div id="controls">Controls: <strong>SPACE / ↑</strong> to jump • <strong>P</strong> to pause</div>
+    <div id="screen-select" class="screen hidden">
+        <h2 style="margin-bottom:15px;">Choose Character</h2>
+        <div id="char-grid"></div>
     </div>
 
-    <!-- Game Area -->
-    <div id="game-container">
-      <div id="score-display">SCORE: 0</div>
-
-      <!-- Player & world -->
-      <div id="player"></div>
-      <div id="ground"></div>
-
-      <!-- Scanlines & vignette (purely visual) -->
-      <div class="scanlines" aria-hidden="true"></div>
-      <div class="vignette" aria-hidden="true"></div>
-
-      <!-- Tap hint for mobile -->
-      <div id="tap-indicator">TAP SCREEN TO JUMP</div>
-
-      <!-- Game Over (retro panel) -->
-      <div id="game-over" class="overlay-panel" role="alert" aria-hidden="true">
-        <div class="panel">
-          <div style="font-size:12px; margin-bottom:6px;">GAME OVER</div>
-          <div id="final-score" style="font-family:'Press Start 2P', monospace; font-size:11px; margin-bottom:10px;">SCORE: 0</div>
-          <div style="display:flex; gap:8px; justify-content:center;">
-            <button class="game-btn" onclick="restartGame()">PLAY AGAIN</button>
-            <button class="game-btn" onclick="backToMenu()">MENU</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pause panel -->
-      <div id="pause-screen" class="overlay-panel" role="dialog" aria-hidden="true">
-        <div class="panel">
-          <div style="font-size:12px; margin-bottom:8px;">PAUSED</div>
-          <div style="display:flex; gap:8px; justify-content:center;">
-            <button class="game-btn" onclick="resumeGame()">RESUME</button>
-            <button class="game-btn" onclick="backToMenu()">MENU</button>
-          </div>
-        </div>
-      </div>
+    <div id="score-hud" class="hidden">0</div>
+    
+    <div id="player" class="entity hidden">
+        <img id="player-img" src="" alt="Player">
     </div>
-  </div>
+    
+    <div id="obstacles-container"></div>
+
+    <div id="ground"></div>
+
+    <div id="screen-gameover" class="screen hidden">
+        <div id="go-title">GAME OVER</div>
+        <h3>Score: <span id="final-score">0</span></h3>
+        <button class="btn" onclick="resetGame()">PLAY AGAIN</button>
+    </div>
 </div>
 
 <script>
-/* ============================================
-   CHARACTER CONFIGURATION
-   ============================================ */
-const CHARACTERS = [
-  {
-    id: 1,
-    name: "Katsuki Bakugo~Kacchan",
-    preview: "https://files.catbox.moe/9p3us8.gif",
-    run: "https://files.catbox.moe/kwbubt.gif",
-    jump: "https://files.catbox.moe/owa4na.gif",
-    obstacle: "https://files.catbox.moe/ywvfth.png"
-  },
-  {
-    id: 2,
-    name: "Kuromi",
-    preview: "https://files.catbox.moe/06zvox.gif",
-    run: "https://files.catbox.moe/vtmuj1.gif",
-    jump: "https://files.catbox.moe/k7myse.gif",
-    obstacle: "https://files.catbox.moe/l1g4y9.png"
-  },
-  {
-    id: 3,
-    name: "Tobio Kageyama",
-    preview: "https://files.catbox.moe/ug0scr.gif",
-    run: "https://files.catbox.moe/hiqk72.gif",
-    jump: "https://files.catbox.moe/2v9js9.gif",
-    obstacle: "https://files.catbox.moe/pw5pew.gif"
-  },
-  {
-    id: 4,
-    name: "Agent ~",
-    preview: "https://files.catbox.moe/1llpxz.gif",
-    run: "https://files.catbox.moe/rbeowx.gif",
-    jump: "https://files.catbox.moe/q4e0lt.gif",
-    obstacle: "https://files.catbox.moe/3awjm4.png"
-  },
-  {
-    id: 5,
-    name: "Daichi Sawamura",
-    preview: "https://files.catbox.moe/ogvedl.gif",
-    run: "https://files.catbox.moe/xlg18f.gif",
-    jump: "https://files.catbox.moe/p8r3y9.gif",
-    obstacle: "https://files.catbox.moe/jjq1mg.gif"
-  },
-  {
-    id: 6,
-    name: "Shōyō Hinata",
-    preview: "https://files.catbox.moe/3ulceq.gif",
-    run: "https://files.catbox.moe/fzs3p9.gif",
-    jump: "https://files.catbox.moe/7diqgf.gif",
-    obstacle: "https://files.catbox.moe/92ijhu.gif"
-  },
-  {
-    id: 7,
-    name: "Conan Gray Vogue World 25",
-    preview: "https://files.catbox.moe/mwr87f.png",
-    run: "https://files.catbox.moe/kw2ymz.gif",
-    jump: "https://files.catbox.moe/ye85f9.gif",
-    obstacle: "https://files.catbox.moe/c3ithb.png"
-  },
-  {
-    id: 8,
-    name: "All Might",
-    preview: "https://files.catbox.moe/f6fdk2.gif",
-    run: "https://files.catbox.moe/z2nukd.gif",
-    jump: "https://files.catbox.moe/bg80fv.gif",
-    obstacle: "https://files.catbox.moe/qp45uq.png"
-  },
-  {
-    id: 9,
-    name: "Toge Inumaki",
-    preview: "https://files.catbox.moe/d20ovr.gif",
-    run: "https://files.catbox.moe/h19oo3.gif",
-    jump: "https://files.catbox.moe/mvajmm.gif",
-    obstacle: "https://files.catbox.moe/mvajmm.gif"
-  }
+// --- DATA ---
+const characters = [
+  { id: 1, name: "Katsuki Bakugo", preview: "https://files.catbox.moe/9p3us8.gif", run: "https://files.catbox.moe/kwbubt.gif", jump: "https://files.catbox.moe/owa4na.gif", obstacle: "https://files.catbox.moe/ywvfth.png" },
+  { id: 2, name: "Kuromi", preview: "https://files.catbox.moe/06zvox.gif", run: "https://files.catbox.moe/vtmuj1.gif", jump: "https://files.catbox.moe/k7myse.gif", obstacle: "https://files.catbox.moe/l1g4y9.png" },
+  { id: 3, name: "Tobio Kageyama", preview: "https://files.catbox.moe/ug0scr.gif", run: "https://files.catbox.moe/hiqk72.gif", jump: "https://files.catbox.moe/2v9js9.gif", obstacle: "https://files.catbox.moe/pw5pew.gif" },
+  { id: 4, name: "Agent ~", preview: "https://files.catbox.moe/1llpxz.gif", run: "https://files.catbox.moe/rbeowx.gif", jump: "https://files.catbox.moe/q4e0lt.gif", obstacle: "https://files.catbox.moe/3awjm4.png" },
+  { id: 5, name: "Daichi Sawamura", preview: "https://files.catbox.moe/ogvedl.gif", run: "https://files.catbox.moe/xlg18f.gif", jump: "https://files.catbox.moe/p8r3y9.gif", obstacle: "https://files.catbox.moe/jjq1mg.gif" },
+  { id: 6, name: "Shōyō Hinata", preview: "https://files.catbox.moe/3ulceq.gif", run: "https://files.catbox.moe/fzs3p9.gif", jump: "https://files.catbox.moe/7diqgf.gif", obstacle: "https://files.catbox.moe/92ijhu.gif" },
+  { id: 7, name: "Conan Gray", preview: "https://files.catbox.moe/mwr87f.png", run: "https://files.catbox.moe/kw2ymz.gif", jump: "https://files.catbox.moe/ye85f9.gif", obstacle: "https://files.catbox.moe/c3ithb.png" },
+  { id: 8, name: "All Might", preview: "https://files.catbox.moe/f6fdk2.gif", run: "https://files.catbox.moe/z2nukd.gif", jump: "https://files.catbox.moe/bg80fv.gif", obstacle: "https://files.catbox.moe/qp45uq.png" },
+  { id: 9, name: "Toge Inumaki", preview: "https://files.catbox.moe/d20ovr.gif", run: "https://files.catbox.moe/h19oo3.gif", jump: "https://files.catbox.moe/mvajmm.gif", obstacle: "https://files.catbox.moe/mvajmm.gif" }
 ];
 
-// Preloaded images cache
-const imageCache = {};
-
-// Game State
+// --- STATE VARIABLES ---
 let selectedChar = null;
-let score = 0;
-let gameSpeed = 5;
+let gameActive = false;
 let isJumping = false;
-let isGameOver = false;
-let isPaused = false;
-let gameLoop = null;
-let obstacleInterval = null;
-let obstacles = [];
+let score = 0;
+let speed = 5; // Pixels per frame
+let animationFrameId;
+let spawnTimeoutId;
+let obstacleList = []; // To track DOM elements
 
-// DOM Elements
-const loadingScreen = document.getElementById('loading-screen');
-const loadBar = document.getElementById('load-bar');
-const loadText = document.getElementById('load-text');
-const preloadContainer = document.getElementById('preload-container');
-const charSelect = document.getElementById('char-select');
-const startBtn = document.getElementById('start-btn');
-const selectionScreen = document.getElementById('selection-screen');
-const gameContainer = document.getElementById('game-container');
-const player = document.getElementById('player');
-const scoreDisplay = document.getElementById('score-display');
-const gameOverScreen = document.getElementById('game-over');
-const finalScore = document.getElementById('final-score');
-const pauseScreen = document.getElementById('pause-screen');
-const tapIndicator = document.getElementById('tap-indicator');
+// --- DOM ELEMENTS ---
+const container = document.getElementById('game-container');
+const playerDiv = document.getElementById('player');
+const playerImg = document.getElementById('player-img');
+const obsContainer = document.getElementById('obstacles-container');
+const scoreHud = document.getElementById('score-hud');
 
-// ============================================
-// PRELOAD SYSTEM
-// ============================================
-function getAllGifUrls() {
-  const urls = [];
-  CHARACTERS.forEach(char => {
-    ['preview', 'run', 'jump', 'obstacle'].forEach(type => {
-      if (char[type] && char[type].trim() !== '') {
-        urls.push({ url: char[type], charId: char.id, type: type });
-      }
+// 1. INITIALIZATION & PRELOAD
+window.onload = () => {
+    let loaded = 0;
+    const total = characters.length * 4; // 4 images per char
+    const bar = document.getElementById('loader-bar');
+    const txt = document.getElementById('loader-text');
+
+    const checkLoad = () => {
+        loaded++;
+        const pct = Math.floor((loaded / total) * 100);
+        bar.style.width = pct + '%';
+        txt.innerText = pct + '%';
+        if(loaded >= total) {
+            setTimeout(() => {
+                document.getElementById('screen-loading').classList.add('hidden');
+                document.getElementById('screen-select').classList.remove('hidden');
+                renderCharSelect();
+            }, 500);
+        }
+    };
+
+    characters.forEach(c => {
+        [c.preview, c.run, c.jump, c.obstacle].forEach(url => {
+            const img = new Image();
+            img.onload = checkLoad;
+            img.onerror = checkLoad; // Proceed even if error
+            img.src = url;
+        });
     });
-  });
-  return urls;
-}
-
-function preloadImage(src) {
-  return new Promise((resolve, reject) => {
-    if (!src || src.trim() === '') {
-      resolve(null);
-      return;
-    }
-    const img = new Image();
-    img.onload = () => {
-      imageCache[src] = img;
-      preloadContainer.appendChild(img);
-      resolve(img);
-    };
-    img.onerror = () => {
-      console.warn(`Failed to load: ${src}`);
-      resolve(null);
-    };
-    img.src = src;
-  });
-}
-
-async function preloadAllAssets() {
-  const allUrls = getAllGifUrls();
-  
-  if (allUrls.length === 0) {
-    loadBar.style.width = '100%';
-    loadText.textContent = 'Ready!';
-    setTimeout(() => {
-      loadingScreen.style.display = 'none';
-      selectionScreen.style.display = 'block';
-      initCharSelect();
-    }, 300);
-    return;
-  }
-  
-  let loaded = 0;
-  const total = allUrls.length;
-  
-  for (const item of allUrls) {
-    await preloadImage(item.url);
-    loaded++;
-    const percent = Math.round((loaded / total) * 100);
-    loadBar.style.width = percent + '%';
-    loadText.textContent = `Loading assets... ${percent}% (${loaded}/${total})`;
-  }
-  
-  loadText.textContent = 'Ready!';
-  setTimeout(() => {
-    loadingScreen.style.display = 'none';
-    selectionScreen.style.display = 'block';
-    initCharSelect();
-  }, 500);
-}
-
-// ============================================
-// CHARACTER SELECTION
-// ============================================
-function initCharSelect() {
-  charSelect.innerHTML = '';
-  CHARACTERS.forEach((char, i) => {
-    const div = document.createElement('div');
-    div.className = 'char-option';
-    div.dataset.id = char.id;
-    
-    let previewContent;
-    if (char.preview && char.preview.trim() !== '') {
-      previewContent = `<img src="${char.preview}" alt="${char.name}">`;
-    } else {
-      previewContent = `<span style="font-size:1.2rem;color:#666;">?</span>`;
-    }
-    
-    div.innerHTML = `
-      <div class="char-preview">${previewContent}</div>
-      <div class="char-name">${char.name}</div>
-    `;
-    div.onclick = () => selectChar(char, div);
-    charSelect.appendChild(div);
-  });
-}
-
-function selectChar(char, el) {
-  document.querySelectorAll('.char-option').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedChar = char;
-  startBtn.disabled = false;
-}
-
-// Start Game
-startBtn.onclick = () => {
-  if (!selectedChar) return;
-  selectionScreen.style.display = 'none';
-  gameContainer.style.display = 'block';
-  startGame();
 };
 
-function startGame() {
-  score = 0;
-  gameSpeed = 5;
-  isGameOver = false;
-  isPaused = false;
-  obstacles = [];
-  
-  document.querySelectorAll('.obstacle').forEach(o => o.remove());
-  setPlayerAnim('run');
-  
-  // Hide tap indicator after 3 seconds
-  if (window.innerWidth <= 768) {
-    tapIndicator.style.display = 'block';
+function renderCharSelect() {
+    const grid = document.getElementById('char-grid');
+    grid.innerHTML = '';
+    characters.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'char-card';
+        card.innerHTML = `<img src="${c.preview}"><p>${c.name}</p>`;
+        card.onclick = () => startGame(c);
+        grid.appendChild(card);
+    });
+}
+
+// 2. GAME LOGIC
+function startGame(char) {
+    selectedChar = char;
+    gameActive = true;
+    score = 0;
+    speed = 6;
+    obstacleList = [];
+    
+    // UI Updates
+    document.getElementById('screen-select').classList.add('hidden');
+    document.getElementById('screen-gameover').classList.add('hidden');
+    scoreHud.classList.remove('hidden');
+    scoreHud.innerText = "0";
+    playerDiv.classList.remove('hidden');
+    obsContainer.innerHTML = ''; // Clear old obstacles
+
+    // Set Player
+    playerImg.src = selectedChar.run;
+    playerDiv.classList.remove('animate-jump');
+    isJumping = false;
+
+    // Listeners
+    container.addEventListener('mousedown', jump);
+    container.addEventListener('touchstart', jump);
+
+    // Start Loops
+    spawnObstacleLoop();
+    gameLoop();
+}
+
+function jump(e) {
+    if(e) e.preventDefault();
+    if(!gameActive || isJumping) return;
+    
+    isJumping = true;
+    playerImg.src = selectedChar.jump;
+    playerDiv.classList.add('animate-jump');
+
+    // Match animation duration (0.8s)
     setTimeout(() => {
-      tapIndicator.style.display = 'none';
-    }, 3000);
-  }
-  
-  gameLoop = requestAnimationFrame(update);
-  obstacleInterval = setInterval(spawnObstacle, 2000);
-  
-  gameOverScreen.style.display = 'none';
-  pauseScreen.style.display = 'none';
+        if(gameActive) {
+            playerDiv.classList.remove('animate-jump');
+            playerImg.src = selectedChar.run;
+            isJumping = false;
+        }
+    }, 800);
 }
 
-function setPlayerAnim(type) {
-  const src = selectedChar[type];
-  if (src && src.trim() !== '') {
-    player.innerHTML = `<img src="${src}" alt="player">`;
-  } else {
-    const colors = {run:'#4CAF50',jump:'#2196F3'};
-    player.innerHTML = `<div style="width:100%;height:100%;background:${colors[type]||'#4CAF50'};border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;">${type[0].toUpperCase()}</div>`;
-  }
+function spawnObstacleLoop() {
+    if(!gameActive) return;
+
+    createObstacle();
+
+    // Random spawn time between 1s and 2.5s, getting faster as score increases
+    let randomTime = Math.random() * 1500 + 1000; 
+    randomTime = Math.max(800, randomTime - (score * 5)); // Cap minimum speed
+
+    spawnTimeoutId = setTimeout(spawnObstacleLoop, randomTime);
 }
 
-function spawnObstacle() {
-  if (isGameOver || isPaused) return;
-  
-  const others = CHARACTERS.filter(c => c.id !== selectedChar.id);
-  const obsChar = others[Math.floor(Math.random() * others.length)];
-  
-  const obs = document.createElement('div');
-  obs.className = 'obstacle';
-  obs.style.right = '-50px';
-  obs.dataset.charId = obsChar.id;
-  
-  if (obsChar.obstacle && obsChar.obstacle.trim() !== '') {
-    obs.innerHTML = `<img src="${obsChar.obstacle}" alt="obstacle">`;
-  } else {
-    obs.innerHTML = `<div style="width:100%;height:100%;background:#e91e63;border-radius:8px;"></div>`;
-  }
-  
-  gameContainer.appendChild(obs);
-  obstacles.push({ el: obs, char: obsChar, x: gameContainer.offsetWidth + 50 });
-}
-
-function update() {
-  if (isGameOver || isPaused) return;
-  
-  score++;
-  scoreDisplay.textContent = `SCORE: ${Math.floor(score/10)}`;
-  
-  if (score % 500 === 0) gameSpeed += 0.5;
-  
-  const containerWidth = gameContainer.offsetWidth;
-  
-  obstacles.forEach((obs, i) => {
-    obs.x -= gameSpeed;
-    obs.el.style.right = (containerWidth - obs.x) + 'px';
+function createObstacle() {
+    const obs = document.createElement('div');
+    obs.className = 'entity obstacle';
     
-    if (obs.x < -60) {
-      obs.el.remove();
-      obstacles.splice(i, 1);
-    }
+    // --- CRITICAL: Random Character Obstacle Logic ---
+    const randomIdx = Math.floor(Math.random() * characters.length);
+    const obstacleData = characters[randomIdx];
+    obs.innerHTML = `<img src="${obstacleData.obstacle}" alt="obs">`;
     
-    if (!obs.hit) {
-      const pRect = player.getBoundingClientRect();
-      const oRect = obs.el.getBoundingClientRect();
-      
-      if (rectsCollide(pRect, oRect)) {
-        gameOver();
-      }
-    }
-  });
-  
-  gameLoop = requestAnimationFrame(update);
-}
-
-function rectsCollide(a, b) {
-  const padding = 15;
-  return !(a.right - padding < b.left + padding || 
-           a.left + padding > b.right - padding || 
-           a.bottom - padding < b.top + padding || 
-           a.top + padding > b.bottom - padding);
-}
-
-function jump() {
-  if (isJumping || isGameOver || isPaused) return;
-  isJumping = true;
-  setPlayerAnim('jump');
-  
-  let vel = 18;
-  const gravity = 0.8;
-  let pos = 60;
-  
-  const jumpLoop = setInterval(() => {
-    if (isPaused) return;
-    vel -= gravity;
-    pos += vel;
+    // Set initial position (off screen right)
+    // We set this in JS so we can manipulate it in the game loop
+    obs.style.left = (container.clientWidth + 50) + 'px'; 
     
-    if (pos <= 60) {
-      pos = 60;
-      clearInterval(jumpLoop);
-      isJumping = false;
-      if (!isGameOver) setPlayerAnim('run');
+    obsContainer.appendChild(obs);
+    obstacleList.push(obs);
+}
+
+function gameLoop() {
+    if(!gameActive) return;
+
+    // Update Score
+    score++;
+    if(score % 10 === 0) {
+        scoreHud.innerText = Math.floor(score/10);
+        // Slowly increase game speed
+        if(speed < 12) speed += 0.005;
     }
-    player.style.bottom = pos + 'px';
-  }, 20);
+
+    // Move Obstacles & Check Collision
+    // We iterate backwards so we can remove items easily
+    for (let i = obstacleList.length - 1; i >= 0; i--) {
+        const obs = obstacleList[i];
+        let currentLeft = parseFloat(obs.style.left);
+        
+        // Move left
+        currentLeft -= speed;
+        obs.style.left = currentLeft + 'px';
+
+        // --- COLLISION DETECTION ---
+        // Using getBoundingClientRect for pixel-perfect DOM intersection
+        const pRect = playerDiv.getBoundingClientRect();
+        const oRect = obs.getBoundingClientRect();
+
+        // Add a small "padding" (hitbox reduction) to make it fair
+        const padding = 15; 
+
+        if (
+            pRect.right - padding > oRect.left + padding &&
+            pRect.left + padding < oRect.right - padding &&
+            pRect.bottom - padding > oRect.top + padding &&
+            pRect.top + padding < oRect.bottom - padding
+        ) {
+            // BOOM - Collision
+            triggerGameOver();
+            return; // Stop loop immediately
+        }
+
+        // Cleanup if off screen
+        if (currentLeft < -100) {
+            obs.remove();
+            obstacleList.splice(i, 1);
+        }
+    }
+
+    animationFrameId = requestAnimationFrame(gameLoop);
 }
 
-function gameOver() {
-  isGameOver = true;
-  cancelAnimationFrame(gameLoop);
-  clearInterval(obstacleInterval);
-  
-  setTimeout(() => {
-    finalScore.textContent = `SCORE: ${Math.floor(score/10)}`;
-    gameOverScreen.style.display = 'flex';
-  }, 500);
+function triggerGameOver() {
+    gameActive = false;
+    cancelAnimationFrame(animationFrameId);
+    clearTimeout(spawnTimeoutId);
+
+    // Remove Listeners to prevent "ghost jumps"
+    container.removeEventListener('mousedown', jump);
+    container.removeEventListener('touchstart', jump);
+
+    // Show Game Over Screen
+    document.getElementById('final-score').innerText = Math.floor(score/10);
+    document.getElementById('screen-gameover').classList.remove('hidden');
 }
 
-function restartGame() {
-  obstacles.forEach(o => o.el.remove());
-  obstacles = [];
-  player.style.bottom = '60px';
-  startGame();
+function resetGame() {
+    document.getElementById('screen-gameover').classList.add('hidden');
+    document.getElementById('screen-select').classList.remove('hidden');
 }
 
-function backToMenu() {
-  cancelAnimationFrame(gameLoop);
-  clearInterval(obstacleInterval);
-  obstacles.forEach(o => o.el.remove());
-  obstacles = [];
-  player.style.bottom = '60px';
-  gameContainer.style.display = 'none';
-  selectionScreen.style.display = 'block';
-  gameOverScreen.style.display = 'none';
-  pauseScreen.style.display = 'none';
-}
-
-function togglePause() {
-  if (isGameOver) return;
-  isPaused = !isPaused;
-  if (isPaused) {
-    pauseScreen.style.display = 'flex';
-  } else {
-    pauseScreen.style.display = 'none';
-    gameLoop = requestAnimationFrame(update);
-  }
-}
-
-function resumeGame() {
-  isPaused = false;
-  pauseScreen.style.display = 'none';
-  gameLoop = requestAnimationFrame(update);
-}
-
-// Controls
-document.addEventListener('keydown', e => {
-  if (e.code === 'Space' || e.code === 'ArrowUp') {
-    e.preventDefault();
-    jump();
-  }
-  if (e.code === 'KeyP') {
-    togglePause();
-  }
-});
-
-// Touch controls for mobile - prevent double-tap zoom
-let lastTouchTime = 0;
-gameContainer.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const currentTime = new Date().getTime();
-  const tapLength = currentTime - lastTouchTime;
-  
-  if (tapLength < 500 && tapLength > 0) {
-    // Double tap - do nothing to prevent zoom
-    return false;
-  }
-  
-  lastTouchTime = currentTime;
-  jump();
-}, { passive: false });
-
-// Prevent context menu on long press
-gameContainer.addEventListener('contextmenu', e => {
-  e.preventDefault();
-  return false;
-});
-
-// ============================================
-// INITIALIZE - Start preloading
-// ============================================
-preloadAllAssets();
 </script>
 </body>
 </html>
+```
