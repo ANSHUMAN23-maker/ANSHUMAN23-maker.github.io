@@ -159,16 +159,110 @@
 <script>
 // --- DATA ---
 const characters = [
-  { id: 1, name: "Katsuki Bakugo", preview: "https://files.catbox.moe/9p3us8.gif", run: "https://files.catbox.moe/kwbubt.gif", jump: "https://files.catbox.moe/owa4na.gif", obstacle: "https://files.catbox.moe/ywvfth.png" },
-  { id: 2, name: "Kuromi", preview: "https://files.catbox.moe/06zvox.gif", run: "https://files.catbox.moe/vtmuj1.gif", jump: "https://files.catbox.moe/k7myse.gif", obstacle: "https://files.catbox.moe/l1g4y9.png" },
-  { id: 3, name: "Tobio Kageyama", preview: "https://files.catbox.moe/ug0scr.gif", run: "https://files.catbox.moe/hiqk72.gif", jump: "https://files.catbox.moe/2v9js9.gif", obstacle: "https://files.catbox.moe/pw5pew.gif" },
-  { id: 4, name: "Agent ~", preview: "https://files.catbox.moe/1llpxz.gif", run: "https://files.catbox.moe/rbeowx.gif", jump: "https://files.catbox.moe/q4e0lt.gif", obstacle: "https://files.catbox.moe/3awjm4.png" },
-  { id: 5, name: "Daichi Sawamura", preview: "https://files.catbox.moe/ogvedl.gif", run: "https://files.catbox.moe/xlg18f.gif", jump: "https://files.catbox.moe/p8r3y9.gif", obstacle: "https://files.catbox.moe/jjq1mg.gif" },
-  { id: 6, name: "Shōyō Hinata", preview: "https://files.catbox.moe/3ulceq.gif", run: "https://files.catbox.moe/fzs3p9.gif", jump: "https://files.catbox.moe/7diqgf.gif", obstacle: "https://files.catbox.moe/92ijhu.gif" },
-  { id: 7, name: "Conan Gray", preview: "https://files.catbox.moe/mwr87f.png", run: "https://files.catbox.moe/kw2ymz.gif", jump: "https://files.catbox.moe/ye85f9.gif", obstacle: "https://files.catbox.moe/c3ithb.png" },
-  { id: 8, name: "All Might", preview: "https://files.catbox.moe/f6fdk2.gif", run: "https://files.catbox.moe/z2nukd.gif", jump: "https://files.catbox.moe/bg80fv.gif", obstacle: "https://files.catbox.moe/qp45uq.png" },
-  { id: 9, name: "Toge Inumaki", preview: "https://files.catbox.moe/d20ovr.gif", run: "https://files.catbox.moe/h19oo3.gif", jump: "https://files.catbox.moe/mvajmm.gif", obstacle: "https://files.catbox.moe/mvajmm.gif" },
-  { id: 10, name: "Robin", preview: "https://files.catbox.moe/018cf3.gif", run: "https://files.catbox.moe/uia4lx.gif", jump: "https://files.catbox.moe/018cf3.gif", obstacle: "https://files.catbox.moe/fceq80.png" }
+  {
+    "id": 1,
+    "name": "Katsuki Bakugo",
+    "preview": "https://files.catbox.moe/9p3us8.gif",
+    "run": "https://files.catbox.moe/kwbubt.gif",
+    "jump": "https://files.catbox.moe/owa4na.gif",
+    "obstacle": "https://files.catbox.moe/ywvfth.png"
+  },
+  {
+    "id": 2,
+    "name": "Kuromi",
+    "preview": "https://files.catbox.moe/06zvox.gif",
+    "run": "https://files.catbox.moe/vtmuj1.gif",
+    "jump": "https://files.catbox.moe/k7myse.gif",
+    "obstacle": "https://files.catbox.moe/l1g4y9.png"
+  },
+  {
+    "id": 3,
+    "name": "Tobio Kageyama",
+    "preview": "https://files.catbox.moe/ug0scr.gif",
+    "run": "https://files.catbox.moe/hiqk72.gif",
+    "jump": "https://files.catbox.moe/2v9js9.gif",
+    "obstacle": "https://files.catbox.moe/pw5pew.gif"
+  },
+  {
+    "id": 4,
+    "name": "Agent ~",
+    "preview": "https://files.catbox.moe/1llpxz.gif",
+    "run": "https://files.catbox.moe/rbeowx.gif",
+    "jump": "https://files.catbox.moe/q4e0lt.gif",
+    "obstacle": "https://files.catbox.moe/3awjm4.png"
+  },
+  {
+    "id": 5,
+    "name": "Daichi Sawamura",
+    "preview": "https://files.catbox.moe/ogvedl.gif",
+    "run": "https://files.catbox.moe/xlg18f.gif",
+    "jump": "https://files.catbox.moe/p8r3y9.gif",
+    "obstacle": "https://files.catbox.moe/jjq1mg.gif"
+  },
+  {
+    "id": 6,
+    "name": "Sh\u014dy\u014d Hinata",
+    "preview": "https://files.catbox.moe/3ulceq.gif",
+    "run": "https://files.catbox.moe/fzs3p9.gif",
+    "jump": "https://files.catbox.moe/7diqgf.gif",
+    "obstacle": "https://files.catbox.moe/92ijhu.gif"
+  },
+  {
+    "id": 7,
+    "name": "Conan Gray",
+    "preview": "https://files.catbox.moe/mwr87f.png",
+    "run": "https://files.catbox.moe/kw2ymz.gif",
+    "jump": "https://files.catbox.moe/ye85f9.gif",
+    "obstacle": "https://files.catbox.moe/c3ithb.png"
+  },
+  {
+    "id": 8,
+    "name": "All Might",
+    "preview": "https://files.catbox.moe/f6fdk2.gif",
+    "run": "https://files.catbox.moe/z2nukd.gif",
+    "jump": "https://files.catbox.moe/bg80fv.gif",
+    "obstacle": "https://files.catbox.moe/qp45uq.png"
+  },
+  {
+    "id": 9,
+    "name": "Toge Inumaki",
+    "preview": "https://files.catbox.moe/d20ovr.gif",
+    "run": "https://files.catbox.moe/h19oo3.gif",
+    "jump": "https://files.catbox.moe/mvajmm.gif",
+    "obstacle": "https://files.catbox.moe/mvajmm.gif"
+  },
+  {
+    "id": 10,
+    "name": "Robin",
+    "preview": "https://files.catbox.moe/018cf3.gif",
+    "run": "https://files.catbox.moe/uia4lx.gif",
+    "jump": "https://files.catbox.moe/018cf3.gif",
+    "obstacle": "https://files.catbox.moe/fceq80.png"
+  },
+  {
+    "id": 11,
+    "name": "Bubbles",
+    "preview": "https://files.catbox.moe/4mdkw3.png",
+    "run": "https://files.catbox.moe/lz799d.png",
+    "jump": "https://files.catbox.moe/z542f5.png",
+    "obstacle": "https://files.catbox.moe/4mdkw3.png"
+  },
+  {
+    "id": 12,
+    "name": "Blossom",
+    "preview": "https://files.catbox.moe/fq4o9w.png",
+    "run": "https://files.catbox.moe/bw9x0y.png",
+    "jump": "https://files.catbox.moe/jzvno6.png",
+    "obstacle": "https://files.catbox.moe/fq4o9w.png"
+  },
+  {
+    "id": 13,
+    "name": "Buttercup",
+    "preview": "https://files.catbox.moe/qkeusy.png",
+    "run": "https://files.catbox.moe/uk9hm9.png",
+    "jump": "https://files.catbox.moe/pkipkh.png",
+    "obstacle": "https://files.catbox.moe/qkeusy.png"
+  }
 ];
 
 // --- STATE VARIABLES ---
