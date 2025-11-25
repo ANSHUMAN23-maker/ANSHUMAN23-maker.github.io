@@ -283,6 +283,10 @@ let animationFrameId;
 let spawnTimeoutId;
 let obstacleList = [];
 
+// --- SOUNDS ---
+const jumpSound = new Audio('https://files.catbox.moe/601ze0.wav');
+const gameOverSound = new Audio('https://files.catbox.moe/0piwoh.ogg');
+
 // --- DOM ELEMENTS ---
 const container = document.getElementById('game-container');
 const playerDiv = document.getElementById('player');
@@ -292,8 +296,9 @@ const scoreHud = document.getElementById('score-hud');
 
 // 1. INITIALIZATION & PRELOAD
 window.onload = () => {
+    // Add sounds to the preload list
     let loaded = 0;
-    const total = characters.length * 4;
+    const total = characters.length * 4 + 2; // +2 for the new sounds
     const bar = document.getElementById('loader-bar');
     const txt = document.getElementById('loader-text');
 
@@ -310,6 +315,13 @@ window.onload = () => {
             }, 500);
         }
     };
+
+    // Preload sounds
+    jumpSound.onloadeddata = checkLoad;
+    gameOverSound.onloadeddata = checkLoad;
+    // Set sources to initiate load in case of browsers that don't auto-load on new Audio()
+    jumpSound.load(); 
+    gameOverSound.load(); 
 
     characters.forEach(c => {
         [c.preview, c.run, c.jump, c.obstacle].forEach(url => {
@@ -366,6 +378,10 @@ function jump(e) {
     isJumping = true;
     playerImg.src = selectedChar.jump;
     playerDiv.classList.add('animate-jump');
+
+    // Play Jump Sound
+    jumpSound.currentTime = 0; // Rewind to start
+    jumpSound.play().catch(e => console.error("Jump sound error:", e));
 
     setTimeout(() => {
         if(gameActive) {
@@ -445,6 +461,10 @@ function triggerGameOver() {
     gameActive = false;
     cancelAnimationFrame(animationFrameId);
     clearTimeout(spawnTimeoutId);
+
+    // Play Game Over Sound
+    gameOverSound.currentTime = 0; // Rewind to start
+    gameOverSound.play().catch(e => console.error("Game Over sound error:", e));
 
     container.removeEventListener('mousedown', jump);
     container.removeEventListener('touchstart', jump);
