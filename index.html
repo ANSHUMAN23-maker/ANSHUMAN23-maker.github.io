@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -103,14 +103,14 @@
     .animate-jump { animation: jumpArc 0.8s linear; }
     @keyframes jumpArc {
         0% { bottom: 15%; }
-        40% { bottom: 45%; } /* Peak */
-        60% { bottom: 45%; } /* Hang time */
+        40% { bottom: 45%; }
+        60% { bottom: 45%; }
         100% { bottom: 15%; }
     }
 
     .obstacle {
         width: 60px; height: 60px;
-        left: 100%; /* Start off screen right */
+        left: 100%;
     }
     .obstacle img { width: 100%; height: 100%; object-fit: contain; }
 
@@ -168,7 +168,7 @@ const characters = [
   { id: 7, name: "Conan Gray", preview: "https://files.catbox.moe/mwr87f.png", run: "https://files.catbox.moe/kw2ymz.gif", jump: "https://files.catbox.moe/ye85f9.gif", obstacle: "https://files.catbox.moe/c3ithb.png" },
   { id: 8, name: "All Might", preview: "https://files.catbox.moe/f6fdk2.gif", run: "https://files.catbox.moe/z2nukd.gif", jump: "https://files.catbox.moe/bg80fv.gif", obstacle: "https://files.catbox.moe/qp45uq.png" },
   { id: 9, name: "Toge Inumaki", preview: "https://files.catbox.moe/d20ovr.gif", run: "https://files.catbox.moe/h19oo3.gif", jump: "https://files.catbox.moe/mvajmm.gif", obstacle: "https://files.catbox.moe/mvajmm.gif" },
-  { id: 10, name: "Robin", preview: "https://files.catbox.moe/018cf3.gif", run: "https://files.catbox.moe/uia4lx.gif", jump: "https://files.catbox.moe/018cf3.gif", obstacle: "https://files.catbox.moe/fceq80.png" }  
+  { id: 10, name: "Robin", preview: "https://files.catbox.moe/018cf3.gif", run: "https://files.catbox.moe/uia4lx.gif", jump: "https://files.catbox.moe/018cf3.gif", obstacle: "https://files.catbox.moe/fceq80.png" }
 ];
 
 // --- STATE VARIABLES ---
@@ -176,10 +176,10 @@ let selectedChar = null;
 let gameActive = false;
 let isJumping = false;
 let score = 0;
-let speed = 5; // Pixels per frame
+let speed = 5;
 let animationFrameId;
 let spawnTimeoutId;
-let obstacleList = []; // To track DOM elements
+let obstacleList = [];
 
 // --- DOM ELEMENTS ---
 const container = document.getElementById('game-container');
@@ -191,7 +191,7 @@ const scoreHud = document.getElementById('score-hud');
 // 1. INITIALIZATION & PRELOAD
 window.onload = () => {
     let loaded = 0;
-    const total = characters.length * 4; // 4 images per char
+    const total = characters.length * 4;
     const bar = document.getElementById('loader-bar');
     const txt = document.getElementById('loader-text');
 
@@ -213,7 +213,7 @@ window.onload = () => {
         [c.preview, c.run, c.jump, c.obstacle].forEach(url => {
             const img = new Image();
             img.onload = checkLoad;
-            img.onerror = checkLoad; // Proceed even if error
+            img.onerror = checkLoad;
             img.src = url;
         });
     });
@@ -239,24 +239,20 @@ function startGame(char) {
     speed = 6;
     obstacleList = [];
     
-    // UI Updates
     document.getElementById('screen-select').classList.add('hidden');
     document.getElementById('screen-gameover').classList.add('hidden');
     scoreHud.classList.remove('hidden');
     scoreHud.innerText = "0";
     playerDiv.classList.remove('hidden');
-    obsContainer.innerHTML = ''; // Clear old obstacles
+    obsContainer.innerHTML = '';
 
-    // Set Player
     playerImg.src = selectedChar.run;
     playerDiv.classList.remove('animate-jump');
     isJumping = false;
 
-    // Listeners
     container.addEventListener('mousedown', jump);
     container.addEventListener('touchstart', jump);
 
-    // Start Loops
     spawnObstacleLoop();
     gameLoop();
 }
@@ -269,7 +265,6 @@ function jump(e) {
     playerImg.src = selectedChar.jump;
     playerDiv.classList.add('animate-jump');
 
-    // Match animation duration (0.8s)
     setTimeout(() => {
         if(gameActive) {
             playerDiv.classList.remove('animate-jump');
@@ -284,9 +279,8 @@ function spawnObstacleLoop() {
 
     createObstacle();
 
-    // Random spawn time between 1s and 2.5s, getting faster as score increases
     let randomTime = Math.random() * 1500 + 1000; 
-    randomTime = Math.max(800, randomTime - (score * 5)); // Cap minimum speed
+    randomTime = Math.max(800, randomTime - (score * 5));
 
     spawnTimeoutId = setTimeout(spawnObstacleLoop, randomTime);
 }
@@ -294,14 +288,11 @@ function spawnObstacleLoop() {
 function createObstacle() {
     const obs = document.createElement('div');
     obs.className = 'entity obstacle';
-    
-    // --- CRITICAL: Random Character Obstacle Logic ---
+
     const randomIdx = Math.floor(Math.random() * characters.length);
     const obstacleData = characters[randomIdx];
     obs.innerHTML = `<img src="${obstacleData.obstacle}" alt="obs">`;
-    
-    // Set initial position (off screen right)
-    // We set this in JS so we can manipulate it in the game loop
+
     obs.style.left = (container.clientWidth + 50) + 'px'; 
     
     obsContainer.appendChild(obs);
@@ -311,30 +302,22 @@ function createObstacle() {
 function gameLoop() {
     if(!gameActive) return;
 
-    // Update Score
     score++;
     if(score % 10 === 0) {
         scoreHud.innerText = Math.floor(score/10);
-        // Slowly increase game speed
         if(speed < 12) speed += 0.005;
     }
 
-    // Move Obstacles & Check Collision
-    // We iterate backwards so we can remove items easily
     for (let i = obstacleList.length - 1; i >= 0; i--) {
         const obs = obstacleList[i];
         let currentLeft = parseFloat(obs.style.left);
         
-        // Move left
         currentLeft -= speed;
         obs.style.left = currentLeft + 'px';
 
-        // --- COLLISION DETECTION ---
-        // Using getBoundingClientRect for pixel-perfect DOM intersection
         const pRect = playerDiv.getBoundingClientRect();
         const oRect = obs.getBoundingClientRect();
 
-        // Add a small "padding" (hitbox reduction) to make it fair
         const padding = 15; 
 
         if (
@@ -343,12 +326,10 @@ function gameLoop() {
             pRect.bottom - padding > oRect.top + padding &&
             pRect.top + padding < oRect.bottom - padding
         ) {
-            // BOOM - Collision
             triggerGameOver();
-            return; // Stop loop immediately
+            return;
         }
 
-        // Cleanup if off screen
         if (currentLeft < -100) {
             obs.remove();
             obstacleList.splice(i, 1);
@@ -363,11 +344,9 @@ function triggerGameOver() {
     cancelAnimationFrame(animationFrameId);
     clearTimeout(spawnTimeoutId);
 
-    // Remove Listeners to prevent "ghost jumps"
     container.removeEventListener('mousedown', jump);
     container.removeEventListener('touchstart', jump);
 
-    // Show Game Over Screen
     document.getElementById('final-score').innerText = Math.floor(score/10);
     document.getElementById('screen-gameover').classList.remove('hidden');
 }
@@ -380,4 +359,3 @@ function resetGame() {
 </script>
 </body>
 </html>
-```
