@@ -406,7 +406,7 @@ function spawnObstacleLoop() {
     createObstacle();
 
     let randomTime = Math.random() * 1500 + 1000; 
-    randomTime = Math.max(800, randomTime - (score * 5));
+    randomTime = Math.max(800, randomTime - (score * 2));
 
     spawnTimeoutId = setTimeout(spawnObstacleLoop, randomTime);
 }
@@ -419,7 +419,7 @@ function createObstacle() {
     const obstacleData = characters[randomIdx];
     obs.innerHTML = `<img src="${obstacleData.obstacle}" alt="obs">`;
 
-    obs.style.left = (container.clientWidth + 50) + 'px'; 
+    obs.style.left = (container.clientWidth + 60) + 'px'; 
     
     obsContainer.appendChild(obs);
     obstacleList.push(obs);
