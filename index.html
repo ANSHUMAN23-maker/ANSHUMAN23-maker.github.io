@@ -429,10 +429,11 @@ function gameLoop() {
     if(!gameActive) return;
 
     score++;
-    if(score % 10 === 0) {
-        scoreHud.innerText = Math.floor(score/10);
-        if(speed < 12) speed += 0.005;
+    if (score % 80 === 0) {
+    if (speed < 12) {
+        speed += 0.2; // adjust amount if you want faster or slower increase
     }
+}
 
     for (let i = obstacleList.length - 1; i >= 0; i--) {
         const obs = obstacleList[i];
